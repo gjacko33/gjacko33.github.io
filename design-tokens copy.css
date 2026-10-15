@@ -1,0 +1,65 @@
+/* Gilang Jecko Portfolio — Design Tokens
+   Concept: black fading to grey (3D feel), white and pink accents.
+   No solid colors: every element uses a gradient. */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+  /* Surfaces */
+  --bg:          radial-gradient(120% 80% at 50% 0%, #2b2b30 0%, #121214 45%, #060607 100%);
+  --bg-base:     #060607; /* fallback under --bg */
+  --card:        linear-gradient(145deg, #34343a 0%, #1c1c20 45%, #0c0c0e 100%);
+  --card-light:  linear-gradient(145deg, #ffffff 0%, #e9e9ec 55%, #c9c9cf 100%);
+  --placeholder: linear-gradient(160deg, #3a3a41 0%, #1a1a1e 60%, #101012 100%);
+
+  /* Accents */
+  --pink:        linear-gradient(135deg, #ffd1ea 0%, #ff8fcb 40%, #e0479e 100%);
+  --pink-soft:   linear-gradient(135deg, rgba(255,143,203,.28) 0%, rgba(224,71,158,.08) 100%);
+  --pink-glow:   #ff8fcb;
+  --on-pink:     #2a0618; /* text on pink */
+  --on-pink-2:   #6b1544; /* secondary text on pink */
+
+  /* Text */
+  --text-white:  linear-gradient(180deg, #ffffff 0%, #b9b9c0 100%); /* use with background-clip:text */
+  --text-body:   #c4c4cb;
+  --text-grey:   #9a9aa3;
+  --text-muted:  #6f6f78;
+
+  /* 3D depth */
+  --edge: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.6);
+  --lift: 0 30px 60px -20px rgba(0,0,0,.8), 0 10px 20px -10px rgba(0,0,0,.6);
+  --btn-pink-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 12px 30px -8px rgba(224,71,158,.7);
+
+  /* Glow orb */
+  --orb: radial-gradient(circle at 35% 30%, #ffd1ea 0%, #ff8fcb 25%, #a1306f 55%, transparent 72%);
+  --orb-blur: 60px;
+  --orb-opacity: .35;
+
+  /* Shape */
+  --r-card: 22px;
+  --r-image: 16px;
+  --r-pill: 999px;
+
+  /* Layout */
+  --max-width: 1240px;
+  --gutter: clamp(16px, 4vw, 56px);
+  --section-pad: clamp(72px, 10vw, 140px);
+
+  /* Type */
+  --font-sans:  'Space Grotesk', sans-serif;
+  --font-serif: 'Instrument Serif', serif; /* italic only, accent words only */
+  --fs-hero:    clamp(68px, 17vw, 240px);
+  --fs-h2:      clamp(36px, 6vw, 76px);
+  --fs-body:    18px;
+  --fs-label:   12px; /* uppercase, letter-spacing .08em */
+}
+
+/* Helpers */
+.grad-white { background: var(--text-white); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.grad-pink  { background: var(--pink);       -webkit-background-clip: text; background-clip: text; color: transparent; }
+.serif      { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+.card       { background: var(--card); border-radius: var(--r-card); box-shadow: var(--edge), var(--lift); }
+.btn-pink   { background: var(--pink); color: var(--on-pink); border-radius: var(--r-pill); box-shadow: var(--btn-pink-shadow); }
+.btn-ghost  { background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.02));
+              box-shadow: inset 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.2); border-radius: var(--r-pill); }
+.label::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 12px var(--pink-glow); }
