@@ -371,3 +371,50 @@ reduceMotion.addEventListener?.('change', () => {
     parallaxItems.forEach((item) => item.style.removeProperty('--scroll-offset'));
   }
 });
+
+const statRotator = document.querySelector('.stat-rotator');
+if (statRotator) {
+  const slides = [...statRotator.querySelectorAll('.stat-slide')];
+  const segments = [...statRotator.querySelectorAll('.stat-progress span')];
+  const statIndex = statRotator.querySelector('.stat-index');
+  let activeStat = 0;
+
+  const countUp = (number) => {
+    const target = Number(number.dataset.count);
+    if (reduceMotion.matches) {
+      number.textContent = target;
+      return;
+    }
+    const start = performance.now();
+    const tick = (now) => {
+      const progress = Math.min((now - start) / 900, 1);
+      number.textContent = Math.round(target * (1 - (1 - progress) ** 3));
+      if (progress < 1) window.requestAnimationFrame(tick);
+    };
+    window.requestAnimationFrame(tick);
+  };
+
+  const showStat = (next) => {
+    slides.forEach((slide, index) => {
+      slide.classList.toggle('is-leaving', index === activeStat);
+      slide.classList.toggle('is-active', index === next);
+    });
+    segments.forEach((segment, index) => {
+      segment.classList.toggle('is-done', index < next);
+      segment.classList.toggle('is-current', index === next);
+    });
+    statIndex.textContent = `(${String(next + 1).padStart(2, '0')})`;
+    countUp(slides[next].querySelector('[data-count]'));
+    activeStat = next;
+  };
+
+  // The progress bar's animation drives the rotation, so hovering the card pauses both.
+  statRotator.addEventListener('animationend', (event) => {
+    if (event.animationName !== 'stat-progress' || reduceMotion.matches) return;
+    showStat((activeStat + 1) % slides.length);
+  });
+  window.setInterval(() => {
+    if (reduceMotion.matches && !statRotator.matches(':hover')) showStat((activeStat + 1) % slides.length);
+  }, 5000);
+  countUp(slides[0].querySelector('[data-count]'));
+}

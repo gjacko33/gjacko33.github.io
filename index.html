@@ -8,9 +8,9 @@
     <title>Gilang Jecko — Creative Director & Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="design-tokens.css" />
-    <link rel="stylesheet" href="styles.css" />
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="design-tokens.css?v=2" />
+    <link rel="stylesheet" href="styles.css?v=2" />
+    <script src="script.js?v=2" defer></script>
   </head>
   <body>
     <div class="site-shell">
@@ -26,25 +26,30 @@
       <main>
         <section class="hero section-wrap" aria-labelledby="hero-title">
           <div class="hero-copy">
-            <p class="eyebrow availability"><span class="status-dot"></span> Available for freelance &amp; full-time — 2026</p>
+            <p class="availability"><span class="status-dot" aria-hidden="true"></span><span>Available for freelance <em>&amp;</em> full-time work</span><span class="availability-year">2026</span></p>
             <h1 id="hero-title">GILANG<br /><em>JECKO</em><span class="hero-period">.</span></h1>
             <div class="hero-bottom">
-              <p class="hero-intro">Creative Director, UI/UX &amp; Brand Designer, designing brands from <em>first sketch</em> to final screen.</p>
-              <div class="hero-actions"><a class="button button-primary" href="#work">View selected work <span>↓</span></a><a class="button button-quiet" href="#contact">Get in touch <span>↗</span></a></div>
+              <div class="hero-lead">
+                <p class="hero-intro">Creative Director, UI/UX &amp; Brand Designer, designing brands from <em>first sketch</em> to final screen.</p>
+                <div class="hero-actions"><a class="button button-primary" href="#work">View selected work <span>↓</span></a><a class="button button-quiet" href="#contact">Get in touch <span>↗</span></a></div>
+              </div>
+              <div class="stat-rotator" role="group" aria-label="Career highlights">
+                <span class="stat-index" aria-hidden="true">(01)</span>
+                <ul class="stat-slides">
+                  <li class="stat-slide is-active"><strong><span data-count="6">6</span><span class="stat-plus">+</span></strong><small>Years in design</small></li>
+                  <li class="stat-slide"><strong><span data-count="20">20</span><span class="stat-plus">+</span></strong><small>Brands worked with</small></li>
+                  <li class="stat-slide"><strong><span data-count="4">4</span></strong><small>Client countries</small></li>
+                  <li class="stat-slide"><strong><span data-count="15">15</span></strong><small>UI/UX projects</small></li>
+                </ul>
+                <div class="stat-progress" aria-hidden="true"><span class="is-current"><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
+              </div>
             </div>
           </div>
           <div class="hero-visual">
             <div class="portrait-frame" aria-hidden="true"></div>
             <div class="hero-orb" aria-hidden="true"></div>
             <img class="hero-portrait" src="assets/gilang-jecko-portrait.webp" alt="Portrait of Gilang Jecko" width="531" height="811" fetchpriority="high" />
-            <div class="hero-sticker">DESIGN<br />WITH<br /><em>INTENT</em> <span>↘</span></div>
             <div class="hero-caption"><span>INDEPENDENT DESIGNER</span><span>BASED IN INDONESIA · 2026</span></div>
-          </div>
-          <div class="stats-grid" aria-label="Career highlights">
-            <div class="stat-card"><span class="stat-index">(01)</span><strong>6<span>+</span></strong><small>Years in design</small></div>
-            <div class="stat-card stat-accent"><span class="stat-index">(02)</span><strong>20<span>+</span></strong><small>Brands worked with</small></div>
-            <div class="stat-card stat-light"><span class="stat-index">(03)</span><strong>4</strong><small>Client countries</small></div>
-            <div class="stat-card"><span class="stat-index">(04)</span><strong>15</strong><small>UI/UX projects</small></div>
           </div>
           <a class="scroll-cue" href="#about"><span>SCROLL TO EXPLORE</span><i>↓</i></a>
         </section>
