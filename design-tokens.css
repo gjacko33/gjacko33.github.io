@@ -1,5 +1,5 @@
 /* Gilang Jecko Portfolio — Design Tokens
-   Concept: black fading to grey (3D feel), white and pink accents.
+   Concept: black fading to deep navy (3D feel), white and muted blue accents.
    No solid colors: every element uses a gradient. */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
@@ -13,11 +13,11 @@
   --placeholder: linear-gradient(160deg, #3a3a41 0%, #1a1a1e 60%, #101012 100%);
 
   /* Accents */
-  --pink:        linear-gradient(135deg, #ffd1ea 0%, #ff8fcb 40%, #e0479e 100%);
-  --pink-soft:   linear-gradient(135deg, rgba(255,143,203,.28) 0%, rgba(224,71,158,.08) 100%);
-  --pink-glow:   #ff8fcb;
-  --on-pink:     #2a0618; /* text on pink */
-  --on-pink-2:   #6b1544; /* secondary text on pink */
+  --accent:      linear-gradient(135deg, #d9e7f4 0%, #91b3d2 42%, #55799b 100%);
+  --accent-soft: linear-gradient(135deg, rgba(105,151,193,.22) 0%, rgba(36,66,98,.1) 100%);
+  --accent-glow: #7899b8;
+  --on-accent:   #111923;
+  --on-accent-2: #273b50;
 
   /* Text */
   --text-white:  linear-gradient(180deg, #ffffff 0%, #b9b9c0 100%); /* use with background-clip:text */
@@ -28,10 +28,10 @@
   /* 3D depth */
   --edge: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.6);
   --lift: 0 30px 60px -20px rgba(0,0,0,.8), 0 10px 20px -10px rgba(0,0,0,.6);
-  --btn-pink-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 12px 30px -8px rgba(224,71,158,.7);
+  --btn-accent-shadow: inset 0 1px 0 rgba(255,255,255,.48), 0 12px 30px -8px rgba(49,83,117,.45);
 
   /* Glow orb */
-  --orb: radial-gradient(circle at 35% 30%, #ffd1ea 0%, #ff8fcb 25%, #a1306f 55%, transparent 72%);
+  --orb: radial-gradient(circle at 35% 30%, #a9c6e0 0%, #50779e 28%, #172d45 58%, transparent 74%);
   --orb-blur: 60px;
   --orb-opacity: .35;
 
@@ -56,10 +56,10 @@
 
 /* Helpers */
 .grad-white { background: var(--text-white); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.grad-pink  { background: var(--pink);       -webkit-background-clip: text; background-clip: text; color: transparent; }
+.grad-accent { background: var(--accent);     -webkit-background-clip: text; background-clip: text; color: transparent; }
 .serif      { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
 .card       { background: var(--card); border-radius: var(--r-card); box-shadow: var(--edge), var(--lift); }
-.btn-pink   { background: var(--pink); color: var(--on-pink); border-radius: var(--r-pill); box-shadow: var(--btn-pink-shadow); }
+.btn-accent { background: var(--accent); color: var(--on-accent); border-radius: var(--r-pill); box-shadow: var(--btn-accent-shadow); }
 .btn-ghost  { background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.02));
               box-shadow: inset 0 0 0 1px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.2); border-radius: var(--r-pill); }
-.label::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 12px var(--pink-glow); }
+.label::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
