@@ -69,50 +69,21 @@ document.querySelectorAll('.client-track').forEach((track) => {
   }));
 });
 
-const websiteStage = document.querySelector('.website-stage');
-const siteCards = [...document.querySelectorAll('.website-card')];
-const stageName = document.querySelector('[data-stage-name]');
-const stageTitle = document.querySelector('[data-stage-title]');
-const stageUrl = document.querySelector('[data-stage-url]');
-const stageLink = document.querySelector('[data-stage-link]');
-
-siteCards.forEach((card) => {
-  const selectButton = card.querySelector('.site-select');
-  if (!selectButton) return;
-  selectButton.addEventListener('click', () => {
-    const { name, url, link } = card.dataset;
-    siteCards.forEach((item) => {
-      const selected = item === card;
-      item.classList.toggle('is-selected', selected);
-      item.querySelector('.site-select')?.classList.toggle('is-selected', selected);
-      item.querySelector('.site-select')?.setAttribute('aria-pressed', String(selected));
-    });
-    websiteStage.dataset.site = name;
-    stageName.textContent = name;
-    stageTitle.textContent = name;
-    stageUrl.textContent = url;
-    if (link) {
-      stageLink.href = link;
-      stageLink.hidden = false;
-    } else {
-      stageLink.hidden = true;
-    }
-  });
-  selectButton.setAttribute('aria-pressed', String(selectButton.classList.contains('is-selected')));
+const siteRows = [...document.querySelectorAll('.site-row')];
+const siteShots = [...document.querySelectorAll('.site-shot')];
+const previewUrl = document.querySelector('[data-preview-url]');
+const showSite = (row) => {
+  siteRows.forEach((item) => item.classList.toggle('is-active', item === row));
+  siteShots.forEach((shot) => shot.classList.toggle('is-active', shot.dataset.site === row.dataset.site));
+  if (previewUrl) previewUrl.textContent = row.dataset.url;
+};
+// Hover and keyboard focus both drive the preview, so it works without a mouse.
+siteRows.forEach((row) => {
+  row.addEventListener('mouseenter', () => showSite(row));
+  row.querySelector('.site-link').addEventListener('focus', () => showSite(row));
 });
 
-document.querySelectorAll('.viewport-button').forEach((button) => {
-  button.addEventListener('click', () => {
-    document.querySelectorAll('.viewport-button').forEach((item) => {
-      const selected = item === button;
-      item.classList.toggle('is-active', selected);
-      item.setAttribute('aria-pressed', String(selected));
-    });
-    websiteStage.dataset.viewport = button.dataset.viewport;
-  });
-});
-
-const revealTargets = document.querySelectorAll('.section-block, .website-card, .brand-gallery-row, .contact-panel');
+const revealTargets = document.querySelectorAll('.section-block, .brand-gallery-row, .contact-panel');
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const observer = new IntersectionObserver((entries, currentObserver) => {
     entries.forEach((entry) => {
@@ -388,33 +359,6 @@ window.addEventListener('resize', () => {
     carousel.scrollLeft = 0;
   });
 }, { passive:true });
-
-const parallaxItems = [...document.querySelectorAll('.project-visual, .website-preview')];
-let scrollFrame = 0;
-const updateParallax = () => {
-  scrollFrame = 0;
-  if (reduceMotion.matches) return;
-  const viewportMidpoint = window.innerHeight / 2;
-  parallaxItems.forEach((item) => {
-    const rect = item.getBoundingClientRect();
-    if (rect.bottom < -120 || rect.top > window.innerHeight + 120) return;
-    const itemMidpoint = rect.top + rect.height / 2;
-    const offset = Math.max(-32, Math.min(32, (viewportMidpoint - itemMidpoint) * 0.07));
-    item.style.setProperty('--scroll-offset', `${offset.toFixed(1)}px`);
-  });
-};
-
-window.addEventListener('scroll', () => {
-  if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateParallax);
-}, { passive:true });
-window.addEventListener('resize', updateParallax, { passive:true });
-updateParallax();
-
-reduceMotion.addEventListener?.('change', () => {
-  if (reduceMotion.matches) {
-    parallaxItems.forEach((item) => item.style.removeProperty('--scroll-offset'));
-  }
-});
 
 const projectCards = [...document.querySelectorAll('.project-card')];
 const storyDialog = document.querySelector('.story-dialog');
