@@ -112,14 +112,7 @@ document.querySelectorAll('.viewport-button').forEach((button) => {
   });
 });
 
-document.querySelectorAll('.story-details').forEach((details) => {
-  details.addEventListener('toggle', () => {
-    const marker = details.querySelector('summary span');
-    if (marker) marker.textContent = details.open ? '−' : '+';
-  });
-});
-
-const revealTargets = document.querySelectorAll('.section-block, .project-card, .website-card, .brand-gallery-row, .contact-panel');
+const revealTargets = document.querySelectorAll('.section-block, .website-card, .brand-gallery-row, .contact-panel');
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const observer = new IntersectionObserver((entries, currentObserver) => {
     entries.forEach((entry) => {
@@ -422,3 +415,61 @@ reduceMotion.addEventListener?.('change', () => {
     parallaxItems.forEach((item) => item.style.removeProperty('--scroll-offset'));
   }
 });
+
+const projectCards = [...document.querySelectorAll('.project-card')];
+const storyDialog = document.querySelector('.story-dialog');
+if (storyDialog && projectCards.length) {
+  const storyPanel = storyDialog.querySelector('.story-panel');
+  const storyBody = storyDialog.querySelector('.story-body');
+  const storyCount = storyDialog.querySelector('.story-count');
+  const storyNext = storyDialog.querySelector('.story-next');
+  const pad = (value) => String(value).padStart(2, '0');
+  let activeStory = 0;
+
+  const openStory = (index) => {
+    activeStory = index;
+    const card = projectCards[index];
+    storyBody.replaceChildren(card.querySelector('.story-template').content.cloneNode(true));
+    storyCount.textContent = `STORY ${pad(index + 1)} / ${pad(projectCards.length)}`;
+    storyNext.querySelector('strong').textContent = projectCards[(index + 1) % projectCards.length].dataset.name;
+    if (!storyDialog.open) {
+      document.documentElement.classList.add('has-dialog');
+      storyDialog.showModal();
+    }
+    storyPanel.scrollTop = 0;
+  };
+
+  projectCards.forEach((card, index) => {
+    card.querySelector('.story-open').addEventListener('click', () => openStory(index));
+  });
+  storyNext.addEventListener('click', () => openStory((activeStory + 1) % projectCards.length));
+  storyDialog.querySelector('.story-close').addEventListener('click', () => storyDialog.close());
+  // The panel fills the dialog, so a click that lands on the dialog itself came from the backdrop.
+  storyDialog.addEventListener('click', (event) => {
+    if (event.target === storyDialog) storyDialog.close();
+  });
+  storyDialog.addEventListener('close', () => {
+    document.documentElement.classList.remove('has-dialog');
+    projectCards[activeStory].querySelector('.story-open').focus({ preventScroll: true });
+  });
+}
+
+const stackQuery = window.matchMedia('(min-width: 641px) and (min-height: 701px)');
+let stackFrame = 0;
+const updateStack = () => {
+  stackFrame = 0;
+  projectCards.forEach((card, index) => {
+    const next = projectCards[index + 1];
+    if (!next || !stackQuery.matches || reduceMotion.matches) {
+      card.style.removeProperty('--stack');
+      return;
+    }
+    const covered = 1 - (next.getBoundingClientRect().top - card.getBoundingClientRect().top) / card.offsetHeight;
+    card.style.setProperty('--stack', Math.min(Math.max(covered, 0), 1).toFixed(3));
+  });
+};
+window.addEventListener('scroll', () => {
+  if (!stackFrame) stackFrame = window.requestAnimationFrame(updateStack);
+}, { passive:true });
+window.addEventListener('resize', updateStack, { passive:true });
+updateStack();
