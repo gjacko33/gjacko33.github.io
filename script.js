@@ -18,6 +18,57 @@ if (menuButton && primaryNav) {
   });
 }
 
+const statTicker = document.querySelector('.stat-ticker');
+if (statTicker) {
+  const slides = [...statTicker.querySelectorAll('.stat-slide')];
+  const segments = [...statTicker.querySelectorAll('.stat-progress span')];
+  const statIndex = statTicker.querySelector('.stat-index');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const pad = (value) => String(value).padStart(2, '0');
+  let activeStat = 0;
+
+  const countUp = (number) => {
+    const target = Number(number.dataset.count);
+    if (prefersReducedMotion.matches) {
+      number.textContent = target;
+      return;
+    }
+    const start = performance.now();
+    const tick = (now) => {
+      const progress = Math.min((now - start) / 900, 1);
+      number.textContent = Math.round(target * (1 - (1 - progress) ** 3));
+      if (progress < 1) window.requestAnimationFrame(tick);
+    };
+    window.requestAnimationFrame(tick);
+  };
+
+  const showStat = (next) => {
+    slides.forEach((slide, index) => {
+      slide.classList.toggle('is-leaving', index === activeStat);
+      slide.classList.toggle('is-active', index === next);
+    });
+    segments.forEach((segment, index) => {
+      segment.classList.toggle('is-done', index < next);
+      segment.classList.toggle('is-current', index === next);
+    });
+    statIndex.textContent = `${pad(next + 1)} / ${pad(slides.length)}`;
+    countUp(slides[next].querySelector('[data-count]'));
+    activeStat = next;
+  };
+
+  // A timer drives the rotation; the progress bar is decoration, so a paused or throttled animation can't stall it.
+  window.setInterval(() => showStat((activeStat + 1) % slides.length), 3000);
+}
+
+// Each logo row scrolls by half its width, so it needs a second, hidden copy of its tiles to loop seamlessly.
+document.querySelectorAll('.client-track').forEach((track) => {
+  track.append(...[...track.children].map((tile) => {
+    const clone = tile.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    return clone;
+  }));
+});
+
 const websiteStage = document.querySelector('.website-stage');
 const siteCards = [...document.querySelectorAll('.website-card')];
 const stageName = document.querySelector('[data-stage-name]');
@@ -371,50 +422,3 @@ reduceMotion.addEventListener?.('change', () => {
     parallaxItems.forEach((item) => item.style.removeProperty('--scroll-offset'));
   }
 });
-
-const statRotator = document.querySelector('.stat-rotator');
-if (statRotator) {
-  const slides = [...statRotator.querySelectorAll('.stat-slide')];
-  const segments = [...statRotator.querySelectorAll('.stat-progress span')];
-  const statIndex = statRotator.querySelector('.stat-index');
-  let activeStat = 0;
-
-  const countUp = (number) => {
-    const target = Number(number.dataset.count);
-    if (reduceMotion.matches) {
-      number.textContent = target;
-      return;
-    }
-    const start = performance.now();
-    const tick = (now) => {
-      const progress = Math.min((now - start) / 900, 1);
-      number.textContent = Math.round(target * (1 - (1 - progress) ** 3));
-      if (progress < 1) window.requestAnimationFrame(tick);
-    };
-    window.requestAnimationFrame(tick);
-  };
-
-  const showStat = (next) => {
-    slides.forEach((slide, index) => {
-      slide.classList.toggle('is-leaving', index === activeStat);
-      slide.classList.toggle('is-active', index === next);
-    });
-    segments.forEach((segment, index) => {
-      segment.classList.toggle('is-done', index < next);
-      segment.classList.toggle('is-current', index === next);
-    });
-    statIndex.textContent = `(${String(next + 1).padStart(2, '0')})`;
-    countUp(slides[next].querySelector('[data-count]'));
-    activeStat = next;
-  };
-
-  // The progress bar's animation drives the rotation, so hovering the card pauses both.
-  statRotator.addEventListener('animationend', (event) => {
-    if (event.animationName !== 'stat-progress' || reduceMotion.matches) return;
-    showStat((activeStat + 1) % slides.length);
-  });
-  window.setInterval(() => {
-    if (reduceMotion.matches && !statRotator.matches(':hover')) showStat((activeStat + 1) % slides.length);
-  }, 5000);
-  countUp(slides[0].querySelector('[data-count]'));
-}
