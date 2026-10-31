@@ -85,7 +85,7 @@ siteRows.forEach((row) => {
 
 // Scroll reveal: each heading, paragraph, card, row and tile blurs and rises in as it enters the viewport,
 // staggered against its matching siblings. Classes are removed afterwards so hover transitions keep working.
-const revealText = '.section-label, .display-heading, .strip-heading, .work-heading p, .work-count, .experience-heading p, .about-copy > *, .client-meta, .gfx-index, .gfx-head, .gfx-foot > *, .contact-kicker, .contact-panel h2, .contact-description, .contact-links';
+const revealText = '.display-heading, .strip-heading, .work-heading p, .work-count, .experience-heading p, .about-copy > *, .client-meta, .gfx-index, .gfx-head, .gfx-foot > *, .contact-kicker, .contact-panel h2, .contact-description, .contact-links';
 const revealMedia = '.skills-panel, .career-list .panel-top, .career-row, .client-row, .project-card > .project-visual, .project-card > .project-info, .site-row, .site-preview, .gfx-wall .gfx-card, .gfx-phone, .contact-panel';
 const revealSelector = `${revealText}, ${revealMedia}`;
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -121,7 +121,7 @@ artworkDialog.hidden = true;
 artworkDialog.innerHTML = `
   <div class="artwork-dialog-panel">
     <header class="artwork-dialog-header">
-      <div><span class="section-label">GRAPHIC PLAYGROUND</span><h2 data-artwork-title>Artwork</h2></div>
+      <div><h2 data-artwork-title>Artwork</h2></div>
       <button class="artwork-close" type="button" aria-label="Close expanded artwork">×</button>
     </header>
     <div class="artwork-zoom-viewport"><div class="artwork-zoom-content" data-artwork-content></div></div>

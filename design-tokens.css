@@ -1,5 +1,5 @@
 /* Gilang Jecko Portfolio — Design Tokens
-   Concept: black fading to deep navy (3D feel), white and muted blue accents.
+   Concept: black fading to deep navy (3D feel), white text and glass accents lit teal to violet.
    No solid colors: every element uses a gradient. */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
@@ -13,14 +13,17 @@
   --placeholder: linear-gradient(160deg, #3a3a41 0%, #1a1a1e 60%, #101012 100%);
 
   /* Accents */
-  --accent:      linear-gradient(135deg, #d9e7f4 0%, #91b3d2 42%, #55799b 100%);
-  --accent-soft: linear-gradient(135deg, rgba(105,151,193,.22) 0%, rgba(36,66,98,.1) 100%);
-  --accent-glow: #7899b8;
+  --accent:      linear-gradient(110deg, #7ff3dc 0%, #63c9ff 34%, #6f86ff 66%, #a07cff 100%); /* glass palette: teal, blue, violet */
+  --highlight:   radial-gradient(55% 85% at 80% 18%, rgba(120,255,226,.95) 0%, rgba(120,255,226,0) 62%), radial-gradient(65% 95% at 58% 100%, rgba(126,112,255,.95) 0%, rgba(126,112,255,0) 66%), radial-gradient(45% 80% at 12% 35%, rgba(70,170,140,.75) 0%, rgba(70,170,140,0) 70%), linear-gradient(112deg, rgba(255,255,255,0) 38%, rgba(255,255,255,.4) 47%, rgba(255,255,255,0) 56%), linear-gradient(180deg, #24344d 0%, #121a30 100%); /* highlight words: dark glass lit teal and violet, with a specular streak */
+  --glass-rim:   rgba(232,240,255,.62);
+  --glass-tint:  linear-gradient(90deg, #6fc9b8 0%, #6aaec4 38%, #7d8ae0 72%, #7a68ea 100%); /* flat version of the glass colours, for thin bars */
+  --accent-soft: linear-gradient(135deg, rgba(127,243,220,.12) 0%, rgba(99,201,255,.1) 45%, rgba(126,112,255,.14) 100%);
+  --accent-glow: #63c9ff;
   --on-accent:   #111923;
   --on-accent-2: #273b50;
 
   /* Text */
-  --text-white:  linear-gradient(180deg, #ffffff 0%, #b9b9c0 100%); /* use with background-clip:text */
+  --text-white:  linear-gradient(180deg, #ffffff 0%, #ffffff 100%); /* plain white, use with background-clip:text */
   --text-body:   #c4c4cb;
   --text-grey:   #9a9aa3;
   --text-muted:  #6f6f78;
@@ -28,10 +31,10 @@
   /* 3D depth */
   --edge: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.6);
   --lift: 0 30px 60px -20px rgba(0,0,0,.8), 0 10px 20px -10px rgba(0,0,0,.6);
-  --btn-accent-shadow: inset 0 1px 0 rgba(255,255,255,.48), 0 12px 30px -8px rgba(49,83,117,.45);
+  --btn-accent-shadow: inset 0 1px 0 rgba(255,255,255,.48), 0 12px 30px -8px rgba(99,150,255,.4);
 
   /* Glow orb */
-  --orb: radial-gradient(circle at 35% 30%, #a9c6e0 0%, #50779e 28%, #172d45 58%, transparent 74%);
+  --orb: radial-gradient(circle at 45% 62%, #7ff3dc 0%, #63c9ff 22%, #7e70ff 42%, #1f2470 60%, transparent 74%);
   --orb-blur: 60px;
   --orb-opacity: .35;
 
