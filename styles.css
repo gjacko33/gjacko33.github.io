@@ -47,11 +47,18 @@ button { font:inherit; }
 .hero-orb { position:absolute; top:4%; left:50%; width:min(85%,380px); aspect-ratio:1; border-radius:50%; background:var(--orb); filter:blur(var(--orb-blur)); opacity:.3; transform:translateX(-50%); pointer-events:none; }
 /* Hero hover: a soft circle follows the cursor over the portrait and shows the Batman version
    underneath it. The circle grows in on enter and shrinks away on leave. */
-@property --reveal { syntax:"<length>"; inherits:true; initial-value:0px; }
-.hero-portrait-alt { position:absolute; z-index:2; bottom:0; left:50%; translate:-50% 0; -webkit-mask-image:radial-gradient(circle var(--reveal) at var(--rx,50%) var(--ry,30%),#000 55%,transparent 100%),linear-gradient(180deg,#000 60%,transparent 97%); mask-image:radial-gradient(circle var(--reveal) at var(--rx,50%) var(--ry,30%),#000 55%,transparent 100%),linear-gradient(180deg,#000 60%,transparent 97%); -webkit-mask-composite:source-in; mask-composite:intersect; transition:--reveal .6s var(--ease); pointer-events:none; }
+@property --reveal { syntax:"<length>"; inherits:true; initial-value:1px; }
+/* The Batman layer and both masks switch on only once script.js marks the hero as interactive, so the photo shows on its own wherever the effect cannot run.
+   The circle never drops below 1px: Safari paints a zero-size radial gradient as fully transparent, which would hide the photo. */
+.hero-portrait-alt { display:none; position:absolute; z-index:2; bottom:0; left:50%; translate:-50% 0; -webkit-mask-image:radial-gradient(circle max(var(--reveal,1px),1px) at var(--rx,50%) var(--ry,30%),#000 55%,transparent 100%),linear-gradient(180deg,#000 60%,transparent 97%); mask-image:radial-gradient(circle max(var(--reveal,1px),1px) at var(--rx,50%) var(--ry,30%),#000 55%,transparent 100%),linear-gradient(180deg,#000 60%,transparent 97%); -webkit-mask-composite:source-in; mask-composite:intersect; transition:--reveal .6s var(--ease); pointer-events:none; }
+.hero-visual.has-reveal .hero-portrait-alt { display:block; }
 .hero-visual.is-revealing { --reveal:clamp(110px,10vw,160px); }
-/* The photo gets the inverse circle, so only the Batman layer shows inside it; at rest the circle is 0px. */
-.hero-visual .hero-portrait:not(.hero-portrait-alt) { -webkit-mask-image:radial-gradient(circle var(--reveal) at var(--rx,50%) var(--ry,30%),transparent 55%,#000 100%),linear-gradient(180deg,#000 60%,transparent 97%); mask-image:radial-gradient(circle var(--reveal) at var(--rx,50%) var(--ry,30%),transparent 55%,#000 100%),linear-gradient(180deg,#000 60%,transparent 97%); -webkit-mask-composite:source-in; mask-composite:intersect; }
+/* The photo gets the inverse circle, so only the Batman layer shows inside it. */
+.hero-visual.has-reveal .hero-portrait:not(.hero-portrait-alt) { -webkit-mask-image:radial-gradient(circle max(var(--reveal,1px),1px) at var(--rx,50%) var(--ry,30%),transparent 55%,#000 100%),linear-gradient(180deg,#000 60%,transparent 97%); mask-image:radial-gradient(circle max(var(--reveal,1px),1px) at var(--rx,50%) var(--ry,30%),transparent 55%,#000 100%),linear-gradient(180deg,#000 60%,transparent 97%); -webkit-mask-composite:source-in; mask-composite:intersect; transition:--reveal .6s var(--ease); }
+/* On touch the photo follows a pressed finger: vertical swipes still scroll the page, and a long press does not open the image menu. */
+.hero-visual.is-touch.is-revealing { --reveal:min(25vw,110px); }
+.hero-visual.has-reveal.is-touch { touch-action:pan-y; -webkit-user-select:none; user-select:none; }
+.hero-visual.is-touch .hero-portrait { -webkit-touch-callout:none; }
 .hero-meta { position:relative; z-index:2; grid-area:meta; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px 0 22px; border-top:1px solid var(--line); }
 .stat-ticker { display:flex; align-items:center; gap:clamp(18px,3vw,36px); }
 .stat-slides { display:grid; width:200px; height:56px; margin:0; padding:0; overflow:hidden; list-style:none; }

@@ -91,7 +91,8 @@ const revealSelector = `${revealText}, ${revealMedia}`;
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
+      // A fast flick can carry an element past the viewport between frames; anything already above it counts as seen.
+      if (!entry.isIntersecting && entry.boundingClientRect.top > 0) return;
       entry.target.classList.add('is-in');
       revealObserver.unobserve(entry.target);
     });
@@ -335,13 +336,15 @@ intro?.addEventListener('animationend', (event) => {
 });
 
 
-// Hero hover: the reveal circle eases toward the cursor so it trails instead of snapping.
+// Hero reveal: a circle over the portrait shows the Batman version and eases toward the pointer so it trails instead of snapping.
+// A mouse drives it on hover. On touch it follows a finger pressed on the photo, and it plays once on its own so phone visitors find it.
 const heroVisual = document.querySelector('.hero-visual');
 const heroAlt = heroVisual?.querySelector('.hero-portrait-alt');
-if (heroVisual && heroAlt && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+if (heroVisual && heroAlt) {
   const target = { x:0, y:0 };
   const spot = { x:0, y:0 };
   let revealFrame = 0;
+  let closeTimer = 0;
 
   const moveReveal = () => {
     const ease = reduceMotion.matches ? 1 : 0.2;
@@ -352,19 +355,51 @@ if (heroVisual && heroAlt && window.matchMedia('(hover: hover) and (pointer: fin
     revealFrame = Math.abs(target.x - spot.x) + Math.abs(target.y - spot.y) > 0.3 ? window.requestAnimationFrame(moveReveal) : 0;
   };
 
-  const trackReveal = (event) => {
+  const trackReveal = (point) => {
     const box = heroAlt.getBoundingClientRect();
-    target.x = event.clientX - box.left;
-    target.y = event.clientY - box.top;
+    target.x = point.clientX - box.left;
+    target.y = point.clientY - box.top;
     if (!revealFrame) revealFrame = window.requestAnimationFrame(moveReveal);
   };
 
-  heroVisual.addEventListener('pointerenter', (event) => {
-    trackReveal(event);
+  const openReveal = (point) => {
+    window.clearTimeout(closeTimer);
+    trackReveal(point);
     spot.x = target.x;
     spot.y = target.y;
     heroVisual.classList.add('is-revealing');
-  });
-  heroVisual.addEventListener('pointermove', trackReveal);
-  heroVisual.addEventListener('pointerleave', () => heroVisual.classList.remove('is-revealing'));
+  };
+  const closeReveal = () => heroVisual.classList.remove('is-revealing');
+
+  heroVisual.classList.add('has-reveal');
+  // Decode the Batman image now so the first reveal never opens onto an empty circle.
+  heroAlt.decode?.().catch(() => {});
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    heroVisual.addEventListener('pointerenter', openReveal);
+    heroVisual.addEventListener('pointermove', trackReveal);
+    heroVisual.addEventListener('pointerleave', closeReveal);
+  } else {
+    heroVisual.classList.add('is-touch');
+    const release = () => { closeTimer = window.setTimeout(closeReveal, 700); };
+    heroVisual.addEventListener('pointerdown', openReveal);
+    heroVisual.addEventListener('pointermove', (event) => { if (heroVisual.classList.contains('is-revealing')) trackReveal(event); });
+    heroVisual.addEventListener('pointerup', release);
+    heroVisual.addEventListener('pointercancel', release);
+
+    // Once the intro has cleared and the photo is on screen, open the circle over the face for a moment.
+    if (!reduceMotion.matches && 'IntersectionObserver' in window) {
+      // The intro covers the page for about four seconds; after that the hint plays soon after the photo scrolls into view.
+      const introEnds = performance.now() + 4200;
+      const hint = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return;
+        hint.disconnect();
+        window.setTimeout(() => {
+          const box = heroAlt.getBoundingClientRect();
+          openReveal({ clientX: box.left + box.width * 0.5, clientY: box.top + box.height * 0.28 });
+          closeTimer = window.setTimeout(closeReveal, 1600);
+        }, Math.max(600, introEnds - performance.now()));
+      }, { threshold: 0.5 });
+      hint.observe(heroVisual);
+    }
+  }
 }
