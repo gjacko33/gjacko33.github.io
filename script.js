@@ -83,23 +83,34 @@ siteRows.forEach((row) => {
   row.querySelector('.site-link').addEventListener('focus', () => showSite(row));
 });
 
-const revealTargets = document.querySelectorAll('.section-block, .brand-gallery-row, .contact-panel');
+// Scroll reveal: each heading, paragraph, card, row and tile blurs and rises in as it enters the viewport,
+// staggered against its matching siblings. Classes are removed afterwards so hover transitions keep working.
+const revealText = '.section-label, .display-heading, .strip-heading, .work-heading p, .work-count, .experience-heading p, .about-copy > *, .client-meta, .gfx-index, .gfx-head, .gfx-foot > *, .contact-kicker, .contact-panel h2, .contact-description, .contact-links';
+const revealMedia = '.skills-panel, .career-list .panel-top, .career-row, .client-row, .project-card > .project-visual, .project-card > .project-info, .site-row, .site-preview, .gfx-wall .gfx-card, .gfx-phone, .contact-panel';
+const revealSelector = `${revealText}, ${revealMedia}`;
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const observer = new IntersectionObserver((entries, currentObserver) => {
+  const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-visible');
-      currentObserver.unobserve(entry.target);
+      entry.target.classList.add('is-in');
+      revealObserver.unobserve(entry.target);
     });
-  }, { threshold: 0.08 });
-  revealTargets.forEach((target) => {
-    target.classList.add('reveal');
-    observer.observe(target);
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll(revealSelector).forEach((element) => {
+    if (element.closest('.hero, .intro, .story-dialog')) return;
+    const siblings = [...element.parentElement.children].filter((child) => child.matches(revealSelector));
+    element.style.setProperty('--reveal-delay', `${Math.min(siblings.indexOf(element), 6) * 80}ms`);
+    element.classList.add('will-reveal');
+    if (element.matches(revealMedia)) element.classList.add('is-media');
+    element.addEventListener('transitionend', (event) => {
+      if (event.target !== element || event.propertyName !== 'transform') return;
+      element.classList.remove('will-reveal', 'is-media', 'is-in');
+      element.style.removeProperty('--reveal-delay');
+    });
+    revealObserver.observe(element);
   });
 }
 
-const graphicCarousels = [...document.querySelectorAll('.brand-marquee')];
-const brandGalleries = document.querySelector('.brand-galleries');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const artworkDialog = document.createElement('div');
 artworkDialog.className = 'artwork-dialog';
@@ -152,15 +163,16 @@ const setArtworkZoom = (value) => {
   artworkZoomContent.classList.toggle('is-zoomed', artworkZoom > 100);
   artworkZoomViewport.classList.toggle('is-zoomed', artworkZoom > 100);
 };
-const openArtwork = (card) => {
-  const brand = card.closest('.brand-gallery-row')?.querySelector('.brand-row-head h3')?.textContent.trim() || 'Graphic';
-  const label = card.querySelector('small')?.textContent.trim() || 'Artwork';
+const openArtwork = (tile) => {
+  const brand = tile.closest('.gfx-brand')?.querySelector('.gfx-head h3')?.textContent.trim() || 'Graphic';
+  const label = tile.querySelector('.gfx-format')?.textContent.trim() || 'Artwork';
   artworkDialog.querySelector('[data-artwork-title]').textContent = `${brand} · ${label}`;
-  const expandedCard = card.cloneNode(true);
-  expandedCard.removeAttribute('aria-hidden');
-  expandedCard.setAttribute('aria-label', `Click to zoom in on ${brand} ${label}`);
-  expandedCard.tabIndex = 0;
-  artworkZoomContent.replaceChildren(expandedCard);
+  const expandedImage = tile.querySelector('.art-image').cloneNode(true);
+  expandedImage.className = '';
+  expandedImage.setAttribute('aria-label', `Click to zoom in on ${brand} ${label}`);
+  expandedImage.tabIndex = 0;
+  artworkZoomContent.style.aspectRatio = getComputedStyle(tile).aspectRatio || '4/5';
+  artworkZoomContent.replaceChildren(expandedImage);
   setArtworkZoom(100);
   artworkZoomViewport.scrollTo(0, 0);
   artworkDialog.hidden = false;
@@ -229,11 +241,11 @@ artworkZoomViewport.addEventListener('click', (event) => {
     event.preventDefault();
     return;
   }
-  const card = event.target.closest('.brand-art-placeholder');
+  const card = event.target.closest('[data-artwork-content] > img');
   if (card) toggleArtworkZoom(card, event.clientX, event.clientY);
 });
 artworkZoomViewport.addEventListener('keydown', (event) => {
-  const card = event.target.closest('.brand-art-placeholder');
+  const card = event.target.closest('[data-artwork-content] > img');
   if (card && ['Enter', ' '].includes(event.key)) {
     event.preventDefault();
     const bounds = card.getBoundingClientRect();
@@ -244,121 +256,19 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && artworkDialog.classList.contains('is-open')) closeArtwork();
 });
 
-const motionToggle = document.querySelector('[data-motion-toggle]');
-let carouselsPaused = false;
-if (motionToggle) {
-  motionToggle.addEventListener('click', () => {
-    carouselsPaused = !carouselsPaused;
-    motionToggle.setAttribute('aria-pressed', String(carouselsPaused));
-    motionToggle.textContent = carouselsPaused ? 'Resume motion' : 'Pause motion';
-    brandGalleries?.classList.toggle('is-paused', carouselsPaused);
-  });
-}
-
-graphicCarousels.forEach((carousel) => {
-  let dragStart = null;
-  let dragged = false;
-  const track = carousel.querySelector('.brand-track');
-  const artwork = [...track.querySelectorAll('.brand-art-placeholder')].slice(0, 3).map((item) => item.cloneNode(true));
-  const buildLoop = () => {
-    const firstRun = artwork.map((item) => {
-      const clone = item.cloneNode(true);
-      clone.removeAttribute('aria-hidden');
-      return clone;
-    });
-    track.replaceChildren(...firstRun);
-    let nextArtwork = 0;
-    while (track.scrollWidth < carousel.clientWidth + firstRun[0].offsetWidth + 10) {
-      const clone = artwork[nextArtwork++ % artwork.length].cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      track.append(clone);
-    }
-    const loopWidth = track.scrollWidth;
-    const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
-    track.style.setProperty('--loop-distance', `${loopWidth + gap}px`);
-    track.append(...[...track.children].map((item) => {
-      const clone = item.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      return clone;
-    }));
-    track.querySelectorAll('.brand-art-placeholder').forEach((card, index) => {
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', `Expand ${card.querySelector('small')?.textContent.trim() || 'artwork'}`);
-      card.tabIndex = index < firstRun.length ? 0 : -1;
-    });
-    carousel.scrollLeft = 0;
-  };
-  buildLoop();
-  let interactionTimer;
-  const pauseForInteraction = () => {
-    carousel.classList.add('is-interacting');
-    window.clearTimeout(interactionTimer);
-    interactionTimer = window.setTimeout(() => carousel.classList.remove('is-interacting'), 1200);
-  };
-  carousel.addEventListener('click', (event) => {
-    if (dragged) {
-      dragged = false;
-      event.preventDefault();
-      return;
-    }
-    const card = event.target.closest('.brand-art-placeholder');
-    if (card) openArtwork(card);
-  });
-  carousel.addEventListener('keydown', (event) => {
-    const card = event.target.closest('.brand-art-placeholder');
-    if (!card || !['Enter', ' '].includes(event.key)) return;
+const artTiles = [...document.querySelectorAll('.gfx-card')];
+// Only tiles that already hold a real artwork image open the zoom lightbox; brand placeholders stay static.
+artTiles.filter((tile) => tile.querySelector('.art-image')).forEach((tile) => {
+  tile.tabIndex = 0;
+  tile.setAttribute('role', 'button');
+  tile.classList.add('has-art');
+  tile.addEventListener('click', () => openArtwork(tile));
+  tile.addEventListener('keydown', (event) => {
+    if (!['Enter', ' '].includes(event.key)) return;
     event.preventDefault();
-    openArtwork(card);
-  });
-  ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach((eventName) => {
-    carousel.addEventListener(eventName, pauseForInteraction, { passive:true });
-  });
-  carousel.addEventListener('pointerdown', (event) => {
-    if (event.pointerType !== 'mouse' || event.button !== 0) return;
-    dragged = false;
-    dragStart = { x:event.clientX, scrollLeft:carousel.scrollLeft };
-  });
-  carousel.addEventListener('pointermove', (event) => {
-    if (!dragStart) return;
-    const distance = event.clientX - dragStart.x;
-    if (Math.abs(distance) > 3) {
-      event.preventDefault();
-      if (!dragged) {
-        dragged = true;
-        carousel.setPointerCapture(event.pointerId);
-      }
-    }
-    pauseForInteraction();
-    carousel.scrollLeft = dragStart.scrollLeft - distance;
-  });
-  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((eventName) => {
-    carousel.addEventListener(eventName, () => { dragStart = null; });
+    openArtwork(tile);
   });
 });
-window.addEventListener('resize', () => {
-  graphicCarousels.forEach((carousel) => {
-    const track = carousel.querySelector('.brand-track');
-    const artwork = [...track.querySelectorAll('.brand-art-placeholder')].slice(0, 3).map((item) => item.cloneNode(true));
-    const firstRun = artwork.map((item) => { const clone = item.cloneNode(true); clone.removeAttribute('aria-hidden'); return clone; });
-    track.replaceChildren(...firstRun);
-    let nextArtwork = 0;
-    while (track.scrollWidth < carousel.clientWidth + firstRun[0].offsetWidth + 10) {
-      const clone = artwork[nextArtwork++ % artwork.length].cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      track.append(clone);
-    }
-    const loopWidth = track.scrollWidth;
-    const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
-    track.style.setProperty('--loop-distance', `${loopWidth + gap}px`);
-    track.append(...[...track.children].map((item) => { const clone = item.cloneNode(true); clone.setAttribute('aria-hidden', 'true'); return clone; }));
-    track.querySelectorAll('.brand-art-placeholder').forEach((card, index) => {
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', `Expand ${card.querySelector('small')?.textContent.trim() || 'artwork'}`);
-      card.tabIndex = index < firstRun.length ? 0 : -1;
-    });
-    carousel.scrollLeft = 0;
-  });
-}, { passive:true });
 
 const projectCards = [...document.querySelectorAll('.project-card')];
 const storyDialog = document.querySelector('.story-dialog');
@@ -417,3 +327,44 @@ window.addEventListener('scroll', () => {
 }, { passive:true });
 window.addEventListener('resize', updateStack, { passive:true });
 updateStack();
+
+// The intro hides itself with CSS; drop it from the page once its curtain animation ends.
+const intro = document.querySelector('.intro');
+intro?.addEventListener('animationend', (event) => {
+  if (event.target === intro) intro.remove();
+});
+
+
+// Hero hover: the reveal circle eases toward the cursor so it trails instead of snapping.
+const heroVisual = document.querySelector('.hero-visual');
+const heroAlt = heroVisual?.querySelector('.hero-portrait-alt');
+if (heroVisual && heroAlt && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const target = { x:0, y:0 };
+  const spot = { x:0, y:0 };
+  let revealFrame = 0;
+
+  const moveReveal = () => {
+    const ease = reduceMotion.matches ? 1 : 0.2;
+    spot.x += (target.x - spot.x) * ease;
+    spot.y += (target.y - spot.y) * ease;
+    heroVisual.style.setProperty('--rx', `${spot.x}px`);
+    heroVisual.style.setProperty('--ry', `${spot.y}px`);
+    revealFrame = Math.abs(target.x - spot.x) + Math.abs(target.y - spot.y) > 0.3 ? window.requestAnimationFrame(moveReveal) : 0;
+  };
+
+  const trackReveal = (event) => {
+    const box = heroAlt.getBoundingClientRect();
+    target.x = event.clientX - box.left;
+    target.y = event.clientY - box.top;
+    if (!revealFrame) revealFrame = window.requestAnimationFrame(moveReveal);
+  };
+
+  heroVisual.addEventListener('pointerenter', (event) => {
+    trackReveal(event);
+    spot.x = target.x;
+    spot.y = target.y;
+    heroVisual.classList.add('is-revealing');
+  });
+  heroVisual.addEventListener('pointermove', trackReveal);
+  heroVisual.addEventListener('pointerleave', () => heroVisual.classList.remove('is-revealing'));
+}
