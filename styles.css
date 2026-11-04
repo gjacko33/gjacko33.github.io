@@ -414,7 +414,7 @@ html.has-dialog { overflow:hidden; }
 .reel.is-iilumo { background:linear-gradient(180deg,#000 50%,#222121 50%); }
 .is-iilumo .reel-scene { background:linear-gradient(180deg,#000,#222121); }
 .il-logo { left:42.13%; top:24.22%; width:15.74%; --t:0s; }
-.il-logo,.il-title,.il-sub,.il-panel,.il-dates,.il-cta { animation:il-io var(--loop) cubic-bezier(.2,.7,.2,1) var(--t) infinite backwards; }
+.il-logo,.il-title,.il-sub,.il-panel,.il-dates,.il-cta { animation:reel-io var(--loop) cubic-bezier(.2,.7,.2,1) var(--t) infinite backwards; }
 .il-title,.il-sub,.il-dates { left:0; width:100%; color:#fff; font-family:'Poppins',var(--font-sans); text-align:center; white-space:nowrap; }
 .il-title { --t:.15s; --is:.9; top:30.78%; color:#ffb600; font-size:8.3cqw; font-weight:800; line-height:8.06cqw; letter-spacing:-.07em; }
 .il-sub { --t:.35s; top:35.83%; font-size:3.76cqw; font-weight:300; line-height:3.27cqw; letter-spacing:.01em; }
@@ -425,8 +425,8 @@ html.has-dialog { overflow:hidden; }
 .il-panel.is-door img { left:-5.14%; top:-12.91%; width:106.8%; height:119.46%; }
 .il-panel.is-dash { --t:.6s; --ix:8cqw; --iy:0; --ox:5cqw; --oy:0; left:50.59%; width:41.45%; clip-path:polygon(0 30.26%,100% 0,100% 63.16%,0 100%); }
 .il-panel.is-dash img { left:-6.57%; top:-2.15%; width:110.59%; height:95.78%; }
-.il-glow { left:20%; top:60.5%; width:60%; height:9%; border-radius:50%; background:radial-gradient(closest-side,rgba(64,220,255,.55),rgba(64,140,255,.2) 55%,transparent); --t:.8s; animation:il-io var(--loop) cubic-bezier(.2,.7,.2,1) var(--t) infinite backwards,il-hue var(--loop) linear infinite,il-pulse 4s ease-in-out infinite alternate; }
-.il-module { --t:.8s; --iy:6cqw; --is:.9; left:29.26%; top:49.95%; width:41.57%; animation:il-io var(--loop) cubic-bezier(.2,.7,.2,1) var(--t) infinite backwards,il-float 4s ease-in-out infinite; }
+.il-glow { left:20%; top:60.5%; width:60%; height:9%; border-radius:50%; background:radial-gradient(closest-side,rgba(64,220,255,.55),rgba(64,140,255,.2) 55%,transparent); --t:.8s; animation:reel-io var(--loop) cubic-bezier(.2,.7,.2,1) var(--t) infinite backwards,il-hue var(--loop) linear infinite,il-pulse 4s ease-in-out infinite alternate; }
+.il-module { --t:.8s; --iy:6cqw; --is:.9; left:29.26%; top:49.95%; width:41.57%; animation:reel-io var(--loop) cubic-bezier(.2,.7,.2,1) var(--t) infinite backwards,il-float 4s ease-in-out infinite; }
 .il-dates { --t:1.1s; top:68.02%; font-size:2.52cqw; font-weight:300; line-height:2.19cqw; letter-spacing:.01em; }
 .il-cta { --t:1.25s; --iy:0; --is:.85; left:26.76%; top:70.57%; display:flex; align-items:center; width:47.04%; height:4.06%; padding-left:.83cqw; overflow:hidden; border-radius:999px; background:#ffb600; box-shadow:.56cqw 1.11cqw 1.58cqw rgba(0,0,0,.25); color:#000; font:700 2.98cqw/1 'Poppins',var(--font-sans); }
 .il-cta span { display:grid; flex:none; width:5.56cqw; height:5.56cqw; place-items:center; border-radius:50%; background:#fff; }
@@ -436,8 +436,90 @@ html.has-dialog { overflow:hidden; }
 @keyframes il-hue { to { filter:hue-rotate(360deg); } }
 @keyframes il-drift { to { transform:scale(1.04) translate(-1%,-1%); } }
 @keyframes il-pulse { from { transform:scale(.9); } }
-@keyframes il-io { 0% { opacity:0; translate:var(--ix,0) var(--iy,3cqw); scale:var(--is,1); } 12%,72% { opacity:1; translate:0 0; scale:1; } 82%,100% { opacity:0; translate:var(--ox,0) var(--oy,-2cqw); scale:var(--os,1); } }
+@keyframes reel-io { 0% { opacity:0; translate:var(--ix,0) var(--iy,3cqw); scale:var(--is,1); } 12%,72% { opacity:1; translate:0 0; scale:1; } 82%,100% { opacity:0; translate:var(--ox,0) var(--oy,-2cqw); scale:var(--os,1); } }
 @keyframes il-float { 50% { transform:translateY(-1.3cqw); } }
+/* Continue story reel from "NAD Ads - Persona 4 - A". script.js builds the ad up in order (photo, logo, copy, pen and vial,
+   badges, button) and, with no exit, cuts back and builds it again every loop. Underneath, these idle loops never stop: the
+   photo breathes, the products float above their shadows, the badges bob and the button glows. The pen and vial keep
+   Figma's own transform matrices (origin top left), so their float is written into the same transform. */
+.reel.is-continue { background:linear-gradient(180deg,#f2f0ec 50%,#e9e3db 50%); }
+.ct-photo { left:0; top:0; width:100%; transform-origin:70% 40%; animation:ct-breathe 4.5s ease-in-out infinite alternate; }
+.ct-logo { left:40.37%; top:16.77%; width:19.26%; }
+.ct-h1,.ct-sub,.ct-note,.ct-chip,.ct-cta { font-family:'Plus Jakarta Sans',var(--font-sans); }
+.ct-h1 { left:7.22%; top:22.03%; color:#000; font-size:6.08cqw; font-weight:600; line-height:6.92cqw; letter-spacing:-.04em; white-space:nowrap; }
+.ct-h1 b { color:#f27822; font-weight:800; }
+.ct-sub { left:7.22%; top:35.26%; color:rgba(0,0,0,.94); font-size:2.52cqw; font-weight:500; line-height:3.15cqw; letter-spacing:-.02em; white-space:nowrap; }
+.ct-shadow { height:1.3%; border-radius:50%; background:radial-gradient(closest-side,rgba(0,0,0,.4),transparent); animation:ct-shadow 4.5s ease-in-out infinite; }
+.ct-shadow.is-pen { left:8.8%; top:75.36%; width:8.89%; }
+.ct-shadow.is-vial { left:27.04%; top:75.26%; width:13.33%; animation-delay:-2.25s; }
+.ct-pen,.ct-vial { transform-origin:0 0; }
+.ct-pen { left:18.85%; top:76.8%; width:10.16%; transform:matrix(-.977,-.214,.214,-.977,0,0); animation:ct-float-pen 4.5s ease-in-out infinite; }
+.ct-vial { left:16.71%; top:58.22%; width:14.62%; transform:matrix(.959,-.282,.282,.959,0,0); animation:ct-float-vial 4.5s ease-in-out -2.25s infinite; }
+/* The badges hug their text like the Figma pills and stay anchored on their right edges, so longer text grows leftwards. */
+.ct-chip { display:flex; align-items:center; gap:.93cqw; height:2.55%; padding:0 1.1cqw 0 .83cqw; border:.07cqw solid #f27822; border-radius:.66cqw; background:#fff; color:#f27822; animation:ct-bob 3s ease-in-out infinite; }
+.ct-chip img { flex:none; width:2.87cqw; }
+.ct-chip b { font-size:1.49cqw; font-weight:600; letter-spacing:-.02em; white-space:nowrap; }
+.ct-chip.is-1 { right:30.28%; top:70.89%; }
+.ct-chip.is-2 { right:7.22%; top:70.89%; animation-delay:-1s; }
+.ct-chip.is-3 { right:7.22%; top:73.85%; animation-delay:-2s; }
+.ct-cta { left:30.74%; top:77.81%; display:grid; width:38.52%; height:3.96%; place-items:center; overflow:hidden; border-radius:999px; background:#ee792a; color:#fff; font:600 2.26cqw/1 'Poppins',var(--font-sans); animation:ct-glow 1.5s ease-in-out infinite alternate; }
+.ct-cta::after { position:absolute; inset:0; background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%); content:""; transform:translateX(-120%); animation:mk-shine 4.5s ease-in-out infinite; }
+.ct-note { left:29.07%; top:82.71%; width:41.85%; color:rgba(0,0,0,.58); font-size:1.02cqw; text-align:center; white-space:nowrap; }
+/* Until script.js starts a reel's build-in, its [data-in] layers stay hidden so they never flash in their final spots. */
+.reel.is-armed:not(.is-live) [data-in] { opacity:0; }
+@keyframes ct-breathe { to { transform:scale(1.045); } }
+@keyframes ct-float-pen { 50% { transform:translateY(-1.6cqw) matrix(-.977,-.214,.214,-.977,0,0); } }
+@keyframes ct-float-vial { 50% { transform:translateY(-1.6cqw) matrix(.959,-.282,.282,.959,0,0); } }
+@keyframes ct-shadow { 50% { transform:scaleX(.82); } }
+@keyframes ct-bob { 50% { transform:translateY(-.9cqw); } }
+@keyframes ct-glow { to { box-shadow:0 0 3cqw rgba(238,121,42,.55); } }
+/* Supps247 story reel from "Legit Xtreme Preworkout" (a 1080x1950 frame). The backdrop, rocks and tubs were rebuilt from
+   their Figma sources with each layer's own transform; script.js builds the ad in and recuts it every loop with no exit,
+   while the tubs keep floating and the falling rock drifts. */
+.reel.is-supps { background:#000; }
+.is-supps .reel-scene { aspect-ratio:1080/1950; }
+.sx-plate { left:0; top:0; width:100%; transform-origin:50% 60%; animation:sx-breathe 5s ease-in-out infinite alternate; }
+.sx-logo { left:39.54%; top:25.59%; width:20.93%; }
+.sx-tub { animation:sx-float 4s ease-in-out infinite; }
+.sx-tub.is-back { left:60.83%; top:33.74%; width:35.56%; animation-delay:-2s; }
+.sx-tub.is-front { left:57.31%; top:50.67%; width:37.13%; }
+.sx-shadow { left:59.35%; top:73.49%; width:33.43%; height:1.95%; border-radius:50%; background:radial-gradient(closest-side,rgba(0,0,0,.85),transparent); animation:sx-shadow 4s ease-in-out infinite; }
+.sx-rock { left:46.11%; top:0; width:53.89%; animation:sx-drift 6s ease-in-out infinite alternate; }
+.sx-headline { left:14.63%; top:34.36%; width:45.49%; }
+.sx-label,.sx-buy,.sx-for,.sx-price,.sx-was { color:#fff; font-family:'Inter',var(--font-sans); letter-spacing:-.05em; text-align:center; white-space:nowrap; }
+.sx-label { left:19.54%; top:50.72%; display:grid; width:33.98%; height:2.05%; place-items:center; border-radius:1.2cqw; background:#01b8ff; font-size:2.31cqw; font-weight:600; line-height:1; }
+.sx-box { left:22.5%; top:53.85%; width:29.17%; height:14.82%; border:.28cqw solid #fff; }
+.sx-buy,.sx-price { left:24.72%; width:24.81%; font-size:8.33cqw; font-style:italic; font-weight:900; line-height:5.09cqw; }
+.sx-buy { top:55.69%; }
+.sx-price { top:64.1%; }
+.sx-for { left:24.72%; top:59.9%; width:24.81%; color:#01b8ff; font-size:4.17cqw; font-style:italic; font-weight:400; line-height:5.09cqw; }
+.sx-rule { left:26.57%; width:21.11%; height:.37cqw; background:#01b8ff; }
+.sx-rule.is-top { top:59.85%; }
+.sx-rule.is-bottom { top:62.72%; }
+.sx-was { left:32.78%; top:69.69%; width:8.89%; color:#01b8ff; font-size:4.17cqw; font-style:italic; font-weight:400; line-height:4.17cqw; }
+/* Two strike lines across the old price: white on top, black just below it. */
+.sx-was::before,.sx-was::after { position:absolute; left:.1cqw; width:9.54cqw; height:.37cqw; content:""; }
+.sx-was::before { top:2.04cqw; background:#fff; }
+.sx-was::after { top:2.31cqw; background:#000; }
+@keyframes sx-breathe { to { transform:scale(1.04); } }
+@keyframes sx-float { 50% { transform:translateY(-1.5cqw); } }
+@keyframes sx-shadow { 50% { transform:scaleX(.85); opacity:.75; } }
+@keyframes sx-drift { to { transform:translate(-1.5cqw,1.2cqw) rotate(-2deg); } }
+/* MKP story reel from "Statics (5) - Best Price Promise". The studio photo is the plate; the logo, headline, copy, laptop
+   and button were lifted out of Figma's render as separate layers. script.js builds them in and recuts every loop with no
+   exit, while the plate breathes, the laptop floats and a light sweep runs across the silver headline. */
+.reel.is-mkp { background:linear-gradient(180deg,#0a0a0a 50%,#111 50%); }
+.mp-plate { left:0; top:0; width:100%; transform-origin:60% 45%; animation:mp-breathe 5s ease-in-out infinite alternate; }
+.mp-logo { left:43.15%; top:16.67%; width:14.63%; }
+.mp-headline,.mp-shine { left:5.83%; top:21.88%; width:88.98%; }
+.mp-shine { aspect-ratio:961/228; background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.7) 50%,transparent 60%) -150% 0/250% 100% no-repeat; -webkit-mask:url("assets/graphics/mkp/reel/headline.webp") 0 0/100% 100%; mask:url("assets/graphics/mkp/reel/headline.webp") 0 0/100% 100%; animation:mp-shine 4s ease-in-out infinite; }
+.mp-body { left:19.63%; top:32.5%; width:58.98%; }
+.mp-laptop { left:0; top:56.15%; width:100%; animation:mp-float 4s ease-in-out infinite; }
+.mp-cta { left:32.59%; top:79.43%; width:34.91%; animation:mp-pulse 2s ease-in-out infinite alternate; }
+@keyframes mp-breathe { to { transform:scale(1.035); } }
+@keyframes mp-float { 50% { transform:translateY(-1cqw); } }
+@keyframes mp-pulse { to { transform:scale(1.04); } }
+@keyframes mp-shine { 0%,40% { background-position:-150% 0; } 80%,100% { background-position:250% 0; } }
 @keyframes st-draw { 0% { stroke-dashoffset:1; } 40%,82% { opacity:1; stroke-dashoffset:0; } 92%,100% { opacity:0; stroke-dashoffset:0; } }
 @keyframes st-pill { 0%,10% { opacity:0; transform:translateY(2.5cqw) rotate(var(--r)) scale(.96); } 20%,82% { opacity:1; transform:rotate(var(--r)); } 92%,100% { opacity:0; transform:translateY(-1.5cqw) rotate(var(--r)); } }
 .gfx-foot { position:relative; display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) auto; align-items:start; gap:clamp(24px,4vw,56px); margin-top:clamp(12px,2vw,24px); }

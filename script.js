@@ -112,6 +112,58 @@ if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-mot
   });
 }
 
+// Story reels with a build-in and no exit: while a reel is on screen, its [data-in] layers enter in order, the finished ad
+// holds, then everything cuts back and builds again once per --loop. Entrances add their movement on top of the running
+// CSS idle loops (composite: 'add'), so the floats and breathing never jump. Reduced motion skips it all and shows the
+// finished design.
+const reelEntrances = {
+  zoom: 'scale(1.12)',
+  down: 'translateY(-3cqw)',
+  up: 'translateY(4cqw)',
+  rise: 'translateY(14cqw)',
+  pop: 'scale(.6)',
+  drop: 'translateY(-16cqw)',
+  slam: 'scale(1.5)',
+  fade: 'none',
+};
+const buildInReels = [...document.querySelectorAll('.reel')].filter((reel) => reel.querySelector('[data-in]'));
+if (buildInReels.length && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const loops = new Map();
+  const buildIn = (reel) => {
+    reel.querySelectorAll('[data-in]').forEach((layer) => {
+      layer.getAnimations().filter((animation) => animation.id === 'build-in').forEach((animation) => animation.cancel());
+      const pop = layer.dataset.in === 'pop';
+      const timing = { id: 'build-in', duration: pop ? 700 : 1000, delay: Number(layer.dataset.t || 0), fill: 'backwards' };
+      layer.animate([{ opacity: 0 }, { opacity: 1 }], { ...timing, easing: 'ease-out' });
+      layer.animate([{ transform: reelEntrances[layer.dataset.in] || 'none' }, { transform: 'none' }], { ...timing, composite: 'add', easing: pop ? 'cubic-bezier(.34,1.56,.64,1)' : 'cubic-bezier(.2,.7,.2,1)' });
+    });
+  };
+  const start = (reel) => {
+    const screen = reel.closest('.is-reel');
+    const loop = (parseFloat(getComputedStyle(screen || reel).getPropertyValue('--loop')) || 8) * 1000;
+    const progress = screen && screen.querySelector('.gfx-story-bars i:first-child');
+    reel.classList.add('is-live');
+    const cycle = () => {
+      buildIn(reel);
+      if (progress) progress.animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0 0' }], { duration: loop, easing: 'linear' });
+    };
+    cycle();
+    loops.set(reel, window.setInterval(cycle, loop));
+  };
+  const stop = (reel) => {
+    reel.classList.remove('is-live');
+    window.clearInterval(loops.get(reel));
+    loops.delete(reel);
+  };
+  const reelObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.intersectionRatio >= 0.45 && !loops.has(entry.target)) start(entry.target);
+      else if (!entry.isIntersecting && loops.has(entry.target)) stop(entry.target);
+    });
+  }, { threshold: [0, 0.45] });
+  buildInReels.forEach((reel) => { reel.classList.add('is-armed'); reelObserver.observe(reel); });
+}
+
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const artworkDialog = document.createElement('div');
 artworkDialog.className = 'artwork-dialog';
