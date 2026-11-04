@@ -407,6 +407,36 @@ html.has-dialog { overflow:hidden; }
 @keyframes hg-tilt { from { transform:rotate(-7deg); } to { transform:rotate(7deg); } }
 @keyframes hg-twinkle { from { opacity:.55; transform:scale(.85); } }
 @keyframes hg-fluff { 0% { opacity:0; transform:translateY(0); } 15%,70% { opacity:.85; } 100% { opacity:0; transform:translateY(-38cqw) translateX(2cqw); } }
+/* Licensed Baddie story reel from the "Glam Where You Are!" post (Feeds 6:123). The 4:5 post was stretched to 9:16 in a temporary
+   Figma copy: the glows hold the top and bottom edges and the two blurred boxes stay cut by the bottom. Like HugGooling it has no
+   entrance or exit; everything moves on matched 3s and 6s cycles, so the loop has no seam. */
+/* The screen is taller than 9:16: the background's top and bottom edge colours continue past the scene. */
+.reel.is-baddie { background:linear-gradient(180deg,#6b235c 50%,#251c3e 50%); }
+.is-baddie .reel-scene { background:#1f254e; }
+.lb-bg { left:0; top:0; width:100%; }
+.lb-glow { left:10%; top:-6%; width:80%; height:22%; border-radius:50%; background:radial-gradient(closest-side,rgba(255,64,160,.55),rgba(220,40,140,.18) 60%,transparent); mix-blend-mode:screen; animation:lb-breathe 3s ease-in-out infinite alternate; }
+.lb-ball { animation:lb-float 6s ease-in-out var(--d,0s) infinite,lb-glint 3s ease-in-out var(--d,0s) infinite alternate; }
+.lb-ball.is-right { left:78.15%; top:14.17%; width:21.85%; --d:-3s; }
+.lb-ball.is-left { left:0; top:35.89%; width:16.11%; }
+.lb-low { animation:lb-drift 6s ease-in-out var(--d,0s) infinite; }
+.lb-low.is-center { left:0; top:81.77%; width:42.59%; --d:-1.5s; }
+.lb-low.is-right { left:68.89%; top:80.94%; width:31.11%; --d:-4.5s; }
+.lb-logo { left:47.13%; top:19.9%; width:5.93%; }
+.lb-headline { left:28.83%; top:29.79%; width:42.28%; }
+.lb-site { left:38.98%; top:82.29%; width:22.41%; }
+.lb-product { left:4.81%; top:40.38%; width:93.09%; animation:lb-hover 6s ease-in-out infinite; }
+.lb-box { display:block; width:100%; height:auto; }
+/* Holographic light runs across the tray window; the window crop is measured from the box image. */
+.lb-sheen { position:absolute; left:25%; top:20.2%; width:50.3%; height:34.6%; overflow:hidden; border-radius:1.4cqw; mix-blend-mode:screen; }
+.lb-sheen::after { position:absolute; inset:-10% -40%; background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.55) 47%,rgba(150,220,255,.35) 52%,transparent 60%); content:""; transform:translateX(-70%); animation:lb-sheen 6s ease-in-out infinite; }
+.lb-spark { left:var(--x); top:var(--y); width:calc(var(--s) * 2.6cqw); aspect-ratio:1; background:radial-gradient(closest-side,#fff,rgba(255,220,245,.6) 40%,transparent); clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%); opacity:0; animation:lb-twinkle 3s ease-in-out var(--d) infinite; }
+@keyframes lb-breathe { from { opacity:.65; transform:scale(.94); } }
+@keyframes lb-float { 50% { transform:translateY(-2.2cqw) rotate(4deg); } }
+@keyframes lb-glint { from { filter:brightness(.92); } to { filter:brightness(1.22); } }
+@keyframes lb-drift { 50% { transform:translate(1.2cqw,-1.6cqw) rotate(-2deg); } }
+@keyframes lb-hover { 25% { transform:translateY(-1.3cqw) rotate(-.6deg); } 75% { transform:translateY(.5cqw) rotate(.4deg); } }
+@keyframes lb-sheen { 0%,35% { transform:translateX(-70%); } 70%,100% { transform:translateX(70%); } }
+@keyframes lb-twinkle { 0%,100% { opacity:0; transform:scale(.4) rotate(0deg); } 50% { opacity:.95; transform:scale(1) rotate(45deg); } }
 /* iilumo story reel from "EOFY Statics Ads 4 ambience v1". The two interiors keep Figma's slanted masks and their LED strips
    run once around the colour wheel per loop. Each loop builds the ad up piece by piece, holds it, then clears it in the
    same order before starting again. The in/out moves use opacity, translate and scale, so they stack on top of the
