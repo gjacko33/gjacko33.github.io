@@ -153,6 +153,9 @@ button { font:inherit; }
 .asset-label { position:absolute; top:18px; left:20px; z-index:2; color:rgba(255,255,255,.56); font-size:8px; }
 .project-cover { position:absolute; z-index:-1; inset:0; width:100%; height:100%; object-fit:cover; object-position:74% 50%; }
 .project-visual.has-cover::before { display:none; }
+/* Motion cover: a 6:5 cut of the loop fills the desktop card; phones get the original 16:9 in a 16:9 frame. Only the visible one loads. */
+.cover-video { position:absolute; z-index:-1; inset:0; width:100%; height:100%; object-fit:cover; }
+.cover-video.is-wide { display:none; }
 .cover-number { position:absolute; right:20px; bottom:17px; color:rgba(255,255,255,.65); font-size:8px; }
 .cover-type { z-index:1; color:#fff; font-size:clamp(30px,5vw,63px); font-weight:600; line-height:.82; letter-spacing:-.09em; text-align:center; }
 .cover-type em { color:#b5cce1; font-family:var(--serif); font-size:1.1em; font-weight:400; }
@@ -612,6 +615,11 @@ html.has-dialog { overflow:hidden; }
   .story-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .gfx-wall.is-left .gfx-row .gfx-card:first-child,.gfx-wall.is-right .gfx-row .gfx-card:last-child { display:none; }
   .gfx-foot { grid-template-columns:1fr 1fr; }
+  /* Below 900px cards with a motion cover stack, so the 16:9 loop shows whole, as on phones. */
+  .project-card.has-motion { grid-template-columns:minmax(0,1fr); height:auto; }
+  .project-card.has-motion .project-visual { order:0; aspect-ratio:1280/714; }
+  .cover-video.is-card { display:none; }
+  .cover-video.is-wide { display:block; }
   .gfx-facts { grid-column:1 / -1; }
   .site-index { grid-template-columns:1fr; }
   .site-preview { display:none; }

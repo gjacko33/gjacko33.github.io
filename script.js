@@ -176,6 +176,19 @@ document.querySelectorAll('.gfx-stage').forEach((stage) => {
 });
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// Motion covers load and play only while on screen; with reduced motion the poster stays.
+const coverVisuals = [...document.querySelectorAll('.project-visual')].filter((visual) => visual.querySelector('.cover-video'));
+if (coverVisuals.length && 'IntersectionObserver' in window) {
+  const coverObserver = new IntersectionObserver((entries) => {
+    entries.forEach(({ target, isIntersecting }) => {
+      const videos = [...target.querySelectorAll('.cover-video')].filter((video) => video.offsetParent !== null);
+      if (!isIntersecting || reduceMotion.matches) { videos.forEach((video) => video.pause()); return; }
+      videos.forEach((video) => { video.preload = 'auto'; video.play().catch(() => {}); });
+    });
+  }, { threshold:0.25 });
+  coverVisuals.forEach((visual) => coverObserver.observe(visual));
+}
 const artworkDialog = document.createElement('div');
 artworkDialog.className = 'artwork-dialog';
 artworkDialog.setAttribute('role', 'dialog');
