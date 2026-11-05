@@ -164,6 +164,17 @@ if (buildInReels.length && 'IntersectionObserver' in window && !window.matchMedi
   buildInReels.forEach((reel) => { reel.classList.add('is-armed'); reelObserver.observe(reel); });
 }
 
+// On mobile the stage scrolls under a sticky phone; --cut fades each graphic out as it reaches the phone.
+document.querySelectorAll('.gfx-stage').forEach((stage) => {
+  const rail = stage.querySelector('.gfx-rail');
+  if (!rail) return;
+  let frame = 0;
+  stage.addEventListener('scroll', () => {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => rail.style.setProperty('--cut', `${stage.scrollLeft}px`));
+  }, { passive:true });
+});
+
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const artworkDialog = document.createElement('div');
 artworkDialog.className = 'artwork-dialog';
@@ -210,8 +221,12 @@ artworkZoomContent.addEventListener('transitionend', (event) => {
 const setArtworkZoom = (value) => {
   artworkZoom = Math.max(100, Math.min(180, Number(value)));
   artworkDialog.querySelector('[data-zoom-value]').textContent = `${artworkZoom}%`;
-  const availableHeight = window.innerHeight - (window.matchMedia('(max-width: 640px)').matches ? 210 : 200);
-  const baseWidth = Math.max(180, Math.min(window.innerWidth * 0.9, availableHeight * 0.8));
+  // Fit the artwork to the space the viewport actually has, so it never pushes the panel past the screen.
+  const viewportStyle = getComputedStyle(artworkZoomViewport);
+  const availableWidth = artworkZoomViewport.clientWidth - (Number.parseFloat(viewportStyle.paddingLeft) || 0) - (Number.parseFloat(viewportStyle.paddingRight) || 0);
+  const availableHeight = artworkZoomViewport.clientHeight - (Number.parseFloat(viewportStyle.paddingTop) || 0) - (Number.parseFloat(viewportStyle.paddingBottom) || 0);
+  const [, ratioW = 4, ratioH = 5] = (artworkZoomContent.style.aspectRatio.match(/([\d.]+)\s*\/\s*([\d.]+)/) || []).map(Number);
+  const baseWidth = Math.max(180, Math.min(availableWidth, availableHeight * ratioW / ratioH));
   artworkZoomContent.style.width = `${baseWidth * artworkZoom / 100}px`;
   artworkZoomContent.classList.toggle('is-zoomed', artworkZoom > 100);
   artworkZoomViewport.classList.toggle('is-zoomed', artworkZoom > 100);
@@ -226,10 +241,10 @@ const openArtwork = (tile) => {
   expandedImage.tabIndex = 0;
   artworkZoomContent.style.aspectRatio = getComputedStyle(tile).aspectRatio || '4/5';
   artworkZoomContent.replaceChildren(expandedImage);
-  setArtworkZoom(100);
-  artworkZoomViewport.scrollTo(0, 0);
   artworkDialog.hidden = false;
   artworkDialog.classList.add('is-open');
+  setArtworkZoom(100);
+  artworkZoomViewport.scrollTo(0, 0);
   document.body.style.overflow = 'hidden';
   artworkDialog.querySelector('.artwork-close').focus();
 };
