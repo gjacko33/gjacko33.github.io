@@ -2,8 +2,6 @@
    Concept: black fading to deep navy (3D feel), white text and glass accents lit teal to violet.
    No solid colors: every element uses a gradient. */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
-
 :root {
   /* Surfaces */
   --bg:          radial-gradient(120% 80% at 50% 0%, #2b2b30 0%, #121214 45%, #060607 100%);

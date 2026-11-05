@@ -73,7 +73,13 @@ const siteRows = [...document.querySelectorAll('.site-row')];
 const siteShots = [...document.querySelectorAll('.site-shot')];
 const previewUrl = document.querySelector('[data-preview-url]');
 // Showcase scenes hold two full-page captures each, so a scene's images load only once it is shown.
-const loadScene = (scene) => scene?.querySelectorAll('img[data-src]').forEach((img) => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
+// Tablets and phones show the smaller panel, so they take the lighter captures.
+const compactSites = window.matchMedia('(max-width: 900px)');
+const loadScene = (scene) => scene?.querySelectorAll('img[data-src]').forEach((img) => {
+  img.src = (compactSites.matches && img.dataset.srcSm) || img.dataset.src;
+  img.removeAttribute('data-src');
+  img.removeAttribute('data-src-sm');
+});
 const showSite = (row) => {
   siteRows.forEach((item) => item.classList.toggle('is-active', item === row));
   siteShots.forEach((shot) => shot.classList.toggle('is-active', shot.dataset.site === row.dataset.site));
@@ -85,6 +91,15 @@ siteRows.forEach((row) => {
   row.addEventListener('mouseenter', () => showSite(row));
   row.querySelector('.site-link').addEventListener('focus', () => showSite(row));
 });
+// There is no hover on touch screens: the row crossing the middle of the list, below the pinned panel, drives the showcase.
+if ('IntersectionObserver' in window) {
+  const centerObserver = new IntersectionObserver((entries) => {
+    if (!compactSites.matches) return;
+    const hit = entries.filter((entry) => entry.isIntersecting).pop();
+    if (hit) showSite(hit.target);
+  }, { rootMargin:'-62% 0px -32% 0px' });
+  siteRows.forEach((row) => centerObserver.observe(row));
+}
 const sitePreview = document.querySelector('.site-preview');
 if (sitePreview && 'IntersectionObserver' in window) {
   const previewObserver = new IntersectionObserver((entries) => {
@@ -512,7 +527,7 @@ if (heroVisual && heroAlt) {
     // Once the intro has cleared and the photo is on screen, open the circle over the face for a moment.
     if (!reduceMotion.matches && 'IntersectionObserver' in window) {
       // The intro covers the page for about four seconds; after that the hint plays soon after the photo scrolls into view.
-      const introEnds = performance.now() + 4200;
+      const introEnds = performance.now() + (document.documentElement.classList.contains('no-intro') ? 600 : 4200);
       const hint = new IntersectionObserver((entries) => {
         if (!entries[0].isIntersecting) return;
         hint.disconnect();
