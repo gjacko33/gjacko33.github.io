@@ -189,15 +189,27 @@ if (buildInReels.length && 'IntersectionObserver' in window && !window.matchMedi
   buildInReels.forEach((reel) => { reel.classList.add('is-armed'); reelObserver.observe(reel); });
 }
 
-// On mobile the stage scrolls under a sticky phone; --cut fades each graphic out as it reaches the phone.
+// On phones each brand shows the reel and four graphics; "View all" opens the rest of the grid in place.
 document.querySelectorAll('.gfx-stage').forEach((stage) => {
-  const rail = stage.querySelector('.gfx-rail');
-  if (!rail) return;
-  let frame = 0;
-  stage.addEventListener('scroll', () => {
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => rail.style.setProperty('--cut', `${stage.scrollLeft}px`));
-  }, { passive:true });
+  const total = stage.querySelectorAll('.gfx-card').length;
+  if (total <= 4) return;
+  stage.id ||= `${stage.closest('.gfx-brand')?.id || 'gfx'}-stage`;
+  const more = document.createElement('button');
+  more.className = 'gfx-more';
+  more.type = 'button';
+  more.setAttribute('aria-controls', stage.id);
+  const label = (open) => {
+    more.setAttribute('aria-expanded', String(open));
+    more.innerHTML = open ? 'Show less <i aria-hidden="true">↓</i>' : `View all ${total} graphics <i aria-hidden="true">↓</i>`;
+  };
+  label(false);
+  more.addEventListener('click', () => {
+    const open = stage.classList.toggle('is-open');
+    label(open);
+    // Closing shrinks the page above the button, so bring the brand back into view instead of dropping the reader further down.
+    if (!open) stage.closest('.gfx-brand')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  stage.after(more);
 });
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -238,8 +250,13 @@ artworkDialog.innerHTML = `
     </header>
     <div class="artwork-zoom-viewport"><div class="artwork-zoom-content" data-artwork-content></div></div>
     <footer class="artwork-dialog-footer">
-      <span>ZOOM <output data-zoom-value>100%</output></span>
-      <span>CLICK TO ZOOM · DRAG TO MOVE · CLICK AGAIN TO RESET</span>
+      <div class="artwork-nav">
+        <button class="artwork-step" type="button" data-step="-1" aria-label="Previous graphic">←</button>
+        <output data-artwork-index>01 / 01</output>
+        <button class="artwork-step" type="button" data-step="1" aria-label="Next graphic">→</button>
+      </div>
+      <span class="artwork-hint">ZOOM <output data-zoom-value>100%</output> · CLICK TO ZOOM · DRAG TO MOVE</span>
+      <span class="artwork-hint is-touch">TAP TO ZOOM · SWIPE FOR NEXT</span>
     </footer>
   </div>`;
 document.body.append(artworkDialog);
@@ -279,7 +296,17 @@ const setArtworkZoom = (value) => {
   artworkZoomContent.classList.toggle('is-zoomed', artworkZoom > 100);
   artworkZoomViewport.classList.toggle('is-zoomed', artworkZoom > 100);
 };
+const phoneGrid = window.matchMedia('(max-width: 640px)');
+let artworkSet = [];
+let artworkIndex = 0;
 const openArtwork = (tile) => {
+  artworkSet = [...(tile.closest('.gfx-stage') || document).querySelectorAll('.gfx-card.has-art')];
+  // Phones lift the two featured graphics to the top of the grid, so the viewer follows that order there.
+  if (phoneGrid.matches) artworkSet.sort((a, b) => b.classList.contains('is-raised') - a.classList.contains('is-raised'));
+  artworkIndex = Math.max(0, artworkSet.indexOf(tile));
+  const pad = (value) => String(value).padStart(2, '0');
+  artworkDialog.querySelector('[data-artwork-index]').textContent = `${pad(artworkIndex + 1)} / ${pad(artworkSet.length)}`;
+  artworkDialog.querySelectorAll('.artwork-step').forEach((button) => { button.hidden = artworkSet.length < 2; });
   const brand = tile.closest('.gfx-brand')?.querySelector('.gfx-head h3')?.textContent.trim() || 'Graphic';
   const label = tile.querySelector('.gfx-format')?.textContent.trim() || 'Artwork';
   artworkDialog.querySelector('[data-artwork-title]').textContent = `${brand} · ${label}`;
@@ -296,8 +323,27 @@ const openArtwork = (tile) => {
   setArtworkZoom(100);
   artworkZoomViewport.scrollTo(0, 0);
   document.body.style.overflow = 'hidden';
-  artworkDialog.querySelector('.artwork-close').focus();
+  if (!artworkDialog.contains(document.activeElement)) artworkDialog.querySelector('.artwork-close').focus();
 };
+const stepArtwork = (step) => {
+  if (artworkSet.length < 2) return;
+  openArtwork(artworkSet[(artworkIndex + step + artworkSet.length) % artworkSet.length]);
+};
+artworkDialog.querySelectorAll('.artwork-step').forEach((button) => {
+  button.addEventListener('click', () => stepArtwork(Number(button.dataset.step)));
+});
+// A sideways swipe on the unzoomed artwork moves through the brand's graphics.
+let artworkSwipe = null;
+artworkZoomViewport.addEventListener('touchstart', (event) => {
+  artworkSwipe = artworkZoom <= 100 && event.touches.length === 1 ? { x:event.touches[0].clientX, y:event.touches[0].clientY } : null;
+}, { passive:true });
+artworkZoomViewport.addEventListener('touchend', (event) => {
+  if (!artworkSwipe) return;
+  const dx = event.changedTouches[0].clientX - artworkSwipe.x;
+  const dy = event.changedTouches[0].clientY - artworkSwipe.y;
+  artworkSwipe = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) stepArtwork(dx < 0 ? 1 : -1);
+});
 const closeArtwork = () => {
   artworkDialog.classList.remove('is-open');
   artworkDialog.hidden = true;
@@ -371,7 +417,10 @@ artworkZoomViewport.addEventListener('keydown', (event) => {
   }
 });
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && artworkDialog.classList.contains('is-open')) closeArtwork();
+  if (!artworkDialog.classList.contains('is-open')) return;
+  if (event.key === 'Escape') closeArtwork();
+  else if (event.key === 'ArrowRight' && artworkZoom <= 100) stepArtwork(1);
+  else if (event.key === 'ArrowLeft' && artworkZoom <= 100) stepArtwork(-1);
 });
 
 const artTiles = [...document.querySelectorAll('.gfx-card')];

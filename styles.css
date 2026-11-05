@@ -574,6 +574,8 @@ html.has-dialog { overflow:hidden; }
 @keyframes mp-shine { 0%,40% { background-position:-150% 0; } 80%,100% { background-position:250% 0; } }
 @keyframes st-draw { 0% { stroke-dashoffset:1; } 40%,82% { opacity:1; stroke-dashoffset:0; } 92%,100% { opacity:0; stroke-dashoffset:0; } }
 @keyframes st-pill { 0%,10% { opacity:0; transform:translateY(2.5cqw) rotate(var(--r)) scale(.96); } 20%,82% { opacity:1; transform:rotate(var(--r)); } 92%,100% { opacity:0; transform:translateY(-1.5cqw) rotate(var(--r)); } }
+.gfx-more { display:none; }
+@keyframes gfx-in { from { opacity:0; transform:translateY(14px); } }
 .gfx-foot { position:relative; display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) auto; align-items:start; gap:clamp(24px,4vw,56px); margin-top:clamp(12px,2vw,24px); }
 .gfx-foot h4 { margin:0 0 8px; color:#f2f0f4; font-size:13px; font-weight:500; text-decoration:underline; text-underline-offset:4px; }
 .gfx-foot p { max-width:46ch; margin:0; color:#c9c6cf; font-size:15px; line-height:1.65; }
@@ -596,7 +598,14 @@ html.has-dialog { overflow:hidden; }
 .artwork-zoom-content.is-zoomed { cursor:zoom-out; touch-action:none; user-select:none; }
 .artwork-zoom-content.is-panning { cursor:grabbing; }
 .artwork-dialog-footer { color:#aaa6b0; font-size:9px; letter-spacing:.1em; }
-.artwork-dialog-footer output { margin-left:6px; color:#cdcdd3; font-variant-numeric:tabular-nums; }
+.artwork-nav { display:flex; align-items:center; gap:12px; }
+.artwork-nav output { min-width:5.5ch; color:#f2f0f4; font-size:11px; text-align:center; font-variant-numeric:tabular-nums; }
+.artwork-step { display:grid; place-items:center; width:44px; height:44px; border:1px solid rgba(255,255,255,.16); border-radius:50%; background:rgba(255,255,255,.05); color:#f5f1f5; font-size:16px; cursor:pointer; }
+.artwork-step:hover { border-color:rgba(125,132,255,.6); background:var(--accent-soft); }
+.artwork-step[hidden] { display:none; }
+.artwork-hint.is-touch { display:none; }
+@media (hover:none) { .artwork-hint { display:none; } .artwork-hint.is-touch { display:inline; } }
+.artwork-hint output { margin-left:6px; color:#cdcdd3; font-variant-numeric:tabular-nums; }
 .contact { padding-top:var(--section-pad); padding-bottom:70px; }
 .contact-panel { position:relative; display:flex; min-height:460px; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; padding:60px 25px; border:1px solid rgba(255,255,255,.12); border-radius:30px; background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.015)); box-shadow:var(--edge),var(--lift); text-align:center; }
 .contact-glow { position:absolute; top:5%; left:50%; width:420px; aspect-ratio:1; border-radius:50%; background:var(--orb); filter:blur(75px); opacity:.3; transform:translateX(-50%); pointer-events:none; }
@@ -728,15 +737,21 @@ html.has-dialog { overflow:hidden; }
   .gfx-head-brand .gfx-lockup { font-size:13px; }
   .gfx-head h3 { min-width:0; overflow:hidden; padding-left:10px; font-size:18px; text-overflow:ellipsis; white-space:nowrap; }
   .gfx-count { flex:none; font-size:10px; }
-  /* The whole row swipes, so a drag on the phone works too; the sticky phone stays put while the graphics pass under it. */
-  .gfx-stage { --pw:min(46vw,200px); --ch:calc((var(--pw) * 19 / 9 - 10px) / 2); display:flex; align-items:center; gap:10px; padding:18px 0 22px 16px; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scroll-snap-type:x proximity; scroll-padding-left:calc(26px + var(--pw)); scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg,transparent 15px,#000 16px,#000 88%,transparent); mask-image:linear-gradient(90deg,transparent 15px,#000 16px,#000 88%,transparent); }
-  .gfx-stage::-webkit-scrollbar { display:none; }
-  .gfx-rail { position:relative; z-index:1; display:grid; flex:none; grid-template-rows:repeat(2,var(--ch)); grid-auto-flow:column; grid-auto-columns:max-content; gap:10px; padding-right:48px; -webkit-mask-image:linear-gradient(90deg,transparent var(--cut,0px),#000 calc(var(--cut,0px) + 18px)); mask-image:linear-gradient(90deg,transparent var(--cut,0px),#000 calc(var(--cut,0px) + 18px)); }
-  .gfx-wall,.gfx-rows,.gfx-row { display:contents; }
-  .gfx-phone { position:sticky; left:0; z-index:3; flex:none; width:var(--pw); padding:6px; border-radius:30px; }
+  /* No sideways scroll on phones: the reel and the two featured graphics form a bento, then a two-column grid.
+     Only the first row of the grid shows until "View all" opens it; every graphic still opens full screen. */
+  .gfx-stage { display:grid; grid-template-columns:repeat(20,minmax(0,1fr)); align-items:stretch; gap:10px; padding:6px 16px 0; overflow:visible; -webkit-mask-image:none; mask-image:none; }
+  .gfx-rail,.gfx-wall,.gfx-rows,.gfx-row { display:contents; }
+  .gfx-phone { order:-2; align-self:start; grid-row:span 2; grid-column:span 11; width:auto; padding:6px; border-radius:30px; }
   .gfx-phone-screen { border-radius:25px; }
   .gfx-wall.is-left .gfx-row .gfx-card:first-child,.gfx-wall.is-right .gfx-row .gfx-card:last-child { display:grid; }
-  .gfx-card,.gfx-card.is-raised { width:calc(var(--ch) * .8); height:var(--ch); border-radius:12px; box-shadow:0 12px 28px -14px rgba(0,0,0,.7); scroll-snap-align:start; }
+  .gfx-card { grid-column:span 10; width:auto; border-radius:14px; box-shadow:0 12px 28px -14px rgba(0,0,0,.7); }
+  .gfx-card.is-raised { order:-1; grid-column:span 9; width:auto; aspect-ratio:auto; min-height:0; border-radius:14px; }
+  .gfx-stage:not(.is-open) .gfx-wall.is-left .gfx-row + .gfx-row .gfx-card,.gfx-stage:not(.is-open) .gfx-wall.is-right .gfx-card:not(.is-raised) { display:none; }
+  .gfx-stage.is-open .gfx-card:not(.is-raised) { animation:gfx-in .5s var(--ease) both; }
+  .gfx-more { display:flex; align-items:center; justify-content:center; gap:8px; width:calc(100% - 32px); min-height:46px; margin:12px 16px 0; border:1px solid rgba(255,255,255,.16); border-radius:999px; background:rgba(255,255,255,.05); color:#f2f0f4; font-size:13px; font-weight:500; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .gfx-more i { font-style:normal; transition:transform .3s var(--ease); }
+  .gfx-more[aria-expanded="true"] i { transform:rotate(180deg); }
+  .gfx-more:active { background:rgba(255,255,255,.1); }
   .gfx-format { top:6px; left:6px; padding:3px 6px; font-size:6.5px; }
   .gfx-foot { grid-template-columns:1fr; gap:14px; }
   .gfx-foot h4 { margin-bottom:6px; font-size:12px; }
@@ -748,7 +763,7 @@ html.has-dialog { overflow:hidden; }
   .artwork-dialog-panel { padding:16px; }
   .artwork-zoom-viewport { margin:14px 0; padding:0; border:0; background:none; }
   .artwork-zoom-content { width:100%; }
-  .artwork-dialog-footer { align-items:flex-start; flex-direction:column; gap:10px; }
+  .artwork-dialog-footer { flex-direction:column-reverse; gap:10px; }
   .contact { padding-top:82px; padding-bottom:45px; }
   .contact-panel { min-height:420px; padding:50px 18px; border-radius:23px; }
   .contact-panel h2 { font-size:clamp(57px,16vw,83px); }
