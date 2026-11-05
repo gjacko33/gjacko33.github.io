@@ -25,7 +25,7 @@ button { font:inherit; }
 .menu-toggle { display:none; }
 .hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.7fr); grid-template-areas:"copy visual" "meta meta"; column-gap:clamp(24px,4vw,64px); padding-top:clamp(40px,7vh,88px); }
 .hero-copy { position:relative; z-index:2; grid-area:copy; align-self:center; padding-bottom:clamp(32px,5vh,56px); }
-.panel-top,.project-meta,.project-foot,.cover-number,.asset-label,.scroll-cue,.contact-kicker { font-size:10px; font-weight:500; letter-spacing:.13em; }
+.panel-top,.project-meta,.project-foot,.scroll-cue,.contact-kicker { font-size:10px; font-weight:500; letter-spacing:.13em; }
 .availability { display:flex; align-items:center; gap:10px; width:max-content; max-width:100%; margin:0; padding:9px 16px 9px 14px; border:1px solid rgba(255,255,255,.14); border-radius:999px; background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.01)); color:#dedce2; font-size:12px; letter-spacing:.01em; }
 .availability em { color:var(--accent-strong); font-family:var(--serif); font-size:1.2em; line-height:1; }
 .availability-year { padding-left:10px; border-left:1px solid rgba(255,255,255,.16); color:var(--text-grey); }
@@ -150,13 +150,10 @@ button { font:inherit; }
 .project-card:nth-child(even) .project-visual { order:2; }
 .project-visual { position:relative; display:flex; min-height:0; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; isolation:isolate; background:var(--placeholder); }
 .project-visual::before { position:absolute; z-index:-1; inset:0; content:""; background:radial-gradient(ellipse at 50% 35%,rgba(255,255,255,.11),transparent 62%); }
-.asset-label { position:absolute; top:18px; left:20px; z-index:2; color:rgba(255,255,255,.56); font-size:8px; }
-.project-cover { position:absolute; z-index:-1; inset:0; width:100%; height:100%; object-fit:cover; object-position:74% 50%; }
 .project-visual.has-cover::before { display:none; }
 /* Motion cover: a 6:5 cut of the loop fills the desktop card; phones get the original 16:9 in a 16:9 frame. Only the visible one loads. */
 .cover-video { position:absolute; z-index:-1; inset:0; width:100%; height:100%; object-fit:cover; }
 .cover-video.is-wide { display:none; }
-.cover-number { position:absolute; right:20px; bottom:17px; color:rgba(255,255,255,.65); font-size:8px; }
 .cover-type { z-index:1; color:#fff; font-size:clamp(30px,5vw,63px); font-weight:600; line-height:.82; letter-spacing:-.09em; text-align:center; }
 .cover-type em { color:#b5cce1; font-family:var(--serif); font-size:1.1em; font-weight:400; }
 .project-continue .project-visual { background:radial-gradient(ellipse at 55% 50%,#4e323f 0,#272126 38%,#111114 75%); }
@@ -228,9 +225,6 @@ html.has-dialog { overflow:hidden; }
 .hug-art .cover-type em { font-family:var(--serif); }
 .hug-sun { position:absolute; top:20%; right:20%; color:#f7d9ad; font-size:50px; }
 .project-paw .project-visual { background:radial-gradient(ellipse at 45% 50%,#435a5a,#253334 53%,#14191b); }
-.paw-grid { display:grid; grid-template-columns:1fr 30px 1fr; align-items:center; gap:9px; width:85%; }
-.paw-grid div { display:grid; min-height:160px; place-items:center; border:1px dashed rgba(255,255,255,.34); border-radius:13px; color:#d5e0d8; font-size:10px; text-align:center; }
-.paw-grid span { color:#b3c9df; }
 .supps-art { background:radial-gradient(ellipse at 51% 56%,#6f3538,#3b2329 44%,#161517 84%); }
 .supps-package { z-index:1; display:grid; width:165px; height:210px; place-content:center; border:1px solid rgba(255,255,255,.35); background:linear-gradient(120deg,#c3c5c2,#555759 33%,#28282c 34%); box-shadow:0 24px 55px rgba(0,0,0,.46); color:#19191a; font-size:22px; font-weight:700; line-height:.95; text-align:center; transform:rotate(-5deg); }
 .supps-package b { color:#f9f5eb; font-size:50px; letter-spacing:-.1em; }
