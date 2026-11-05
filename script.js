@@ -72,9 +72,12 @@ document.querySelectorAll('.client-track').forEach((track) => {
 const siteRows = [...document.querySelectorAll('.site-row')];
 const siteShots = [...document.querySelectorAll('.site-shot')];
 const previewUrl = document.querySelector('[data-preview-url]');
+// Showcase scenes hold two full-page captures each, so a scene's images load only once it is shown.
+const loadScene = (scene) => scene?.querySelectorAll('img[data-src]').forEach((img) => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
 const showSite = (row) => {
   siteRows.forEach((item) => item.classList.toggle('is-active', item === row));
   siteShots.forEach((shot) => shot.classList.toggle('is-active', shot.dataset.site === row.dataset.site));
+  loadScene(siteShots.find((shot) => shot.dataset.site === row.dataset.site));
   if (previewUrl) previewUrl.textContent = row.dataset.url;
 };
 // Hover and keyboard focus both drive the preview, so it works without a mouse.
@@ -82,6 +85,28 @@ siteRows.forEach((row) => {
   row.addEventListener('mouseenter', () => showSite(row));
   row.querySelector('.site-link').addEventListener('focus', () => showSite(row));
 });
+const sitePreview = document.querySelector('.site-preview');
+if (sitePreview && 'IntersectionObserver' in window) {
+  const previewObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    loadScene(siteShots.find((shot) => shot.classList.contains('is-active')));
+    previewObserver.disconnect();
+  }, { rootMargin:'600px 0px' });
+  previewObserver.observe(sitePreview);
+} else {
+  loadScene(siteShots.find((shot) => shot.classList.contains('is-active')));
+}
+// Long site names shrink so the wordmark behind each showcase stays inside the panel; cqw keeps it scaling with the stage.
+const fitWords = () => document.querySelectorAll('.sx-word').forEach((word) => {
+  const room = word.parentElement.clientWidth * 0.88;
+  if (!room) return;
+  word.style.fontSize = '';
+  if (word.scrollWidth > room) word.style.fontSize = `${(18 * room / word.scrollWidth).toFixed(2)}cqw`;
+});
+document.fonts.ready.then(fitWords);
+// The panel is hidden on phones, so fit again once a resize shows it.
+let fitTimer = 0;
+window.addEventListener('resize', () => { window.clearTimeout(fitTimer); fitTimer = window.setTimeout(fitWords, 200); }, { passive:true });
 
 // Scroll reveal: each heading, paragraph, card, row and tile blurs and rises in as it enters the viewport,
 // staggered against its matching siblings. Classes are removed afterwards so hover transitions keep working.
@@ -187,7 +212,17 @@ if (coverVisuals.length && 'IntersectionObserver' in window) {
       videos.forEach((video) => { video.preload = 'auto'; video.play().catch(() => {}); });
     });
   }, { threshold:0.25 });
-  coverVisuals.forEach((visual) => coverObserver.observe(visual));
+  // Posters attach a screen ahead of the card, and only for the variant this layout shows.
+  const posterObserver = new IntersectionObserver((entries) => {
+    entries.filter((entry) => entry.isIntersecting).forEach(({ target }) => {
+      target.querySelectorAll('.cover-video[data-poster]').forEach((video) => {
+        if (video.offsetParent === null) return;
+        video.poster = video.dataset.poster;
+        video.removeAttribute('data-poster');
+      });
+    });
+  }, { rootMargin:'100% 0px' });
+  coverVisuals.forEach((visual) => { coverObserver.observe(visual); posterObserver.observe(visual); });
 }
 const artworkDialog = document.createElement('div');
 artworkDialog.className = 'artwork-dialog';
@@ -249,6 +284,8 @@ const openArtwork = (tile) => {
   const label = tile.querySelector('.gfx-format')?.textContent.trim() || 'Artwork';
   artworkDialog.querySelector('[data-artwork-title]').textContent = `${brand} · ${label}`;
   const expandedImage = tile.querySelector('.art-image').cloneNode(true);
+  // Cards show a small copy; the lightbox swaps in the full-size original.
+  if (expandedImage.dataset.full) expandedImage.src = expandedImage.dataset.full;
   expandedImage.className = '';
   expandedImage.setAttribute('aria-label', `Click to zoom in on ${brand} ${label}`);
   expandedImage.tabIndex = 0;
@@ -444,6 +481,7 @@ if (heroVisual && heroAlt) {
 
   const openReveal = (point) => {
     window.clearTimeout(closeTimer);
+    if (heroAlt.dataset.src) loadHeroAlt();
     trackReveal(point);
     spot.x = target.x;
     spot.y = target.y;
@@ -452,8 +490,13 @@ if (heroVisual && heroAlt) {
   const closeReveal = () => heroVisual.classList.remove('is-revealing');
 
   heroVisual.classList.add('has-reveal');
-  // Decode the Batman image now so the first reveal never opens onto an empty circle.
-  heroAlt.decode?.().catch(() => {});
+  // The Batman image only shows on hover or touch, so it loads once the page has, then decodes so the first reveal is never empty.
+  const loadHeroAlt = () => {
+    if (heroAlt.dataset.src) { heroAlt.src = heroAlt.dataset.src; heroAlt.removeAttribute('data-src'); }
+    heroAlt.decode?.().catch(() => {});
+  };
+  if (document.readyState === 'complete') loadHeroAlt();
+  else window.addEventListener('load', loadHeroAlt, { once:true });
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     heroVisual.addEventListener('pointerenter', openReveal);
     heroVisual.addEventListener('pointermove', trackReveal);
