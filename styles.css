@@ -269,7 +269,45 @@ html.has-dialog { overflow:hidden; }
 .sx-phone { position:absolute; z-index:2; bottom:5cqh; left:6cqw; width:30cqw; aspect-ratio:9/19.5; padding:1.1cqw; border-radius:5.4cqw; background:linear-gradient(145deg,#4a4a52,#141417 40%,#2e2e34); box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 50px 80px -20px rgba(0,0,0,.95),0 0 100px -24px color-mix(in srgb,var(--tone) 70%,transparent); transform:rotateY(24deg) rotateX(10deg) rotateZ(-7deg); }
 .sx-phone::after { position:absolute; top:2.2cqw; left:50%; width:8cqw; height:2.2cqw; border-radius:999px; background:#0a0a0c; content:""; transform:translateX(-50%); }
 .sx-phone .site-viewport { border-radius:4.3cqw; }
-@media (prefers-reduced-motion:reduce) { .site-page { animation:none!important; } }
+@media (prefers-reduced-motion:reduce) { .site-page,.mail-page { animation:none!important; } }
+/* Email showcase: phone mockups, placeholder layouts until the real emails arrive */
+.mail-list { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; margin:0; padding:0; list-style:none; }
+.mail-stage { position:relative; aspect-ratio:4/5; overflow:hidden; container-type:inline-size; border-radius:var(--r-card); background:radial-gradient(ellipse 75% 55% at 50% 38%,color-mix(in srgb,var(--tone) 62%,transparent),transparent 72%),linear-gradient(180deg,#09090b,#121215); box-shadow:inset 0 0 0 1px rgba(255,255,255,.07); }
+.mail-stage::before { position:absolute; inset:0; background:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/22px 22px; content:""; -webkit-mask-image:radial-gradient(ellipse 60% 50% at 50% 40%,#000,transparent 75%); mask-image:radial-gradient(ellipse 60% 50% at 50% 40%,#000,transparent 75%); }
+/* The hand photo sits on top; its screen is cut out, so the email shows through from underneath. */
+.mail-phone { position:absolute; inset:0; display:block; width:100%; padding:0; background:none; transform-origin:50% 100%; transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+.mail-hand { position:absolute; z-index:1; inset:0; width:100%; height:100%; pointer-events:none; }
+.mail-screen { position:absolute; top:10%; bottom:0; left:24.8%; display:block; width:50.4%; overflow:hidden; container-type:size; border-radius:4.6cqw 4.6cqw 0 0; background:#f2f1ee; }
+.mail-screen::after { position:absolute; inset:0; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.18) 48%,transparent 62%); content:""; pointer-events:none; }
+button.mail-phone { border:0; color:inherit; font:inherit; cursor:zoom-in; }
+button.mail-phone:focus-visible { outline:2px solid color-mix(in srgb,var(--tone) 70%,#fff); outline-offset:-3px; border-radius:var(--r-card); }
+.mail-page { display:block; width:100%; height:auto; animation:site-scroll var(--scroll,20s) cubic-bezier(.45,0,.55,1) infinite alternate; }
+.mail-ph { display:flex; min-height:100%; flex-direction:column; }
+.mail-ph i { display:block; font-style:normal; }
+.mp-from { display:flex; align-items:center; gap:3cqw; padding:17cqw 6cqw 4.5cqw; }
+.mp-from b { display:grid; flex:none; width:10cqw; height:10cqw; place-items:center; border-radius:50%; background:var(--tone); color:#fff; font-size:4.6cqw; font-weight:600; }
+.mp-from span { display:flex; min-width:0; flex-direction:column; gap:1.6cqw; }
+.mp-from strong { overflow:hidden; color:#1a1a1d; font-size:4.3cqw; font-weight:600; line-height:1; white-space:nowrap; text-overflow:ellipsis; }
+.mp-from i { width:34cqw; height:2.4cqw; border-radius:9px; background:#d6d4cf; }
+.mp-body { display:flex; flex:1; flex-direction:column; gap:3cqw; margin:0 3.5cqw; padding:5cqw; border-radius:4cqw 4cqw 0 0; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.mp-brand { color:color-mix(in srgb,var(--tone) 70%,#000); font-size:4cqw; font-weight:600; letter-spacing:.02em; text-align:center; }
+.mp-hero { aspect-ratio:1/.82; margin-bottom:1.5cqw; border-radius:3cqw; background:radial-gradient(circle at 72% 28%,color-mix(in srgb,var(--tone) 35%,#fff),transparent 58%),linear-gradient(150deg,var(--tone),color-mix(in srgb,var(--tone) 55%,#000)); }
+.mp-h { height:4.4cqw; border-radius:2cqw; background:#25252a; }
+.mp-t { height:2.2cqw; border-radius:2cqw; background:#e0ded9; }
+.mp-h.is-short { width:62%; }
+.mp-t.is-short { width:70%; }
+.mp-btn { width:46%; height:8.5cqw; margin:2cqw auto; border-radius:999px; background:var(--tone); }
+.mp-grid { display:grid; grid-template-columns:1fr 1fr; gap:3cqw; }
+.mp-grid i { aspect-ratio:1; border-radius:2.4cqw; background:color-mix(in srgb,var(--tone) 20%,#f1efeb); }
+.mail-info { display:flex; align-items:center; gap:12px; margin-top:16px; }
+.mail-info .site-num { align-self:center; padding:0; }
+.mail-info h3 { margin:0; color:#f2f0f5; font-size:22px; font-weight:500; letter-spacing:-.04em; }
+.mail-info .site-status { margin-left:auto; }
+.mail-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.mail-tab { padding:6px 10px; border:1px solid rgba(255,255,255,.12); border-radius:999px; background:none; color:#8e8b95; font:inherit; font-size:11px; cursor:pointer; transition:border-color .25s ease,background .25s ease,color .25s ease; }
+.mail-tab:hover { color:#f2f0f5; }
+.mail-tab[aria-pressed="true"] { border-color:color-mix(in srgb,var(--tone) 60%,transparent); background:color-mix(in srgb,var(--tone) 16%,transparent); color:#f2f0f5; }
+@media (hover:hover) { .mail-card:hover .mail-phone { transform:scale(1.03); } }
 /* Graphics: one showcase per brand. Each panel fades in and out of its brand tint, so brands blend into each other. */
 .gfx-index { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 clamp(40px,6vw,72px); }
 .gfx-index a { padding:8px 13px; border:1px solid rgba(255,255,255,.14); border-radius:999px; background:rgba(255,255,255,.03); color:#c9c6cf; font-size:12px; white-space:nowrap; transition:border-color .25s ease,background .25s ease,color .25s ease; }
@@ -590,7 +628,8 @@ html.has-dialog { overflow:hidden; }
 .artwork-close { font-size:25px; line-height:1; }
 .artwork-close:hover { border-color:rgba(125,132,255,.6); background:var(--accent-soft); }
 .artwork-zoom-viewport { display:grid; min-width:0; min-height:0; flex:1; place-items:center; margin:20px 0; padding:20px; overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:16px; background:radial-gradient(ellipse at 50% 45%,rgba(125,132,255,.09),transparent 65%),rgba(255,255,255,.018); }
-.artwork-zoom-viewport.is-zoomed { display:block; }
+.artwork-zoom-viewport.is-zoomed,.artwork-zoom-viewport.is-tall { display:block; }
+.artwork-zoom-viewport.is-tall .artwork-zoom-content { margin:0 auto; }
 .artwork-zoom-content { width:min(72vw,560px); aspect-ratio:4/5; cursor:zoom-in; transition:width .18s ease; }
 .artwork-zoom-content.is-zoomed { cursor:zoom-out; touch-action:none; user-select:none; }
 .artwork-zoom-content.is-panning { cursor:grabbing; }
@@ -614,6 +653,7 @@ html.has-dialog { overflow:hidden; }
   .project-card { position:relative; top:auto; height:auto; min-height:480px; transform:none; filter:none; }
 }
 @media (max-width:900px) {
+  .mail-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .hero h1 { font-size:clamp(84px,17vw,160px); }
   .about-content { grid-template-columns:1fr; gap:35px; }
   .about-copy { max-width:610px; margin-left:auto; }
@@ -643,6 +683,10 @@ html.has-dialog { overflow:hidden; }
   .site-link,.site-row.is-active .site-link { grid-template-columns:30px minmax(0,1fr) auto; padding:14px 4px; }
 }
 @media (max-width:640px) {
+  .mail-list { display:flex; gap:12px; margin:0 calc(var(--gutter) * -1); padding:0 var(--gutter) 6px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory; scroll-padding-left:var(--gutter); scrollbar-width:none; }
+  .mail-list::-webkit-scrollbar { display:none; }
+  .mail-card { flex:0 0 min(72vw,290px); scroll-snap-align:start; }
+  .mail-info h3 { font-size:19px; }
   html { scroll-padding-top:80px; }
   .site-header { grid-template-columns:1fr auto auto; min-height:54px; padding:6px 7px 6px 17px; }
   .menu-toggle { display:flex; width:38px; height:38px; flex-direction:column; align-items:center; justify-content:center; gap:5px; margin-right:6px; border:1px solid rgba(255,255,255,.15); border-radius:50%; background:transparent; cursor:pointer; }
@@ -804,3 +848,13 @@ html.has-dialog { overflow:hidden; }
 .button:hover::before,.header-cta:hover::before,.story-open:hover::before,.story-link:hover::before,.button:focus-visible::before,.header-cta:focus-visible::before,.story-open:focus-visible::before,.story-link:focus-visible::before { --glow-x:102%; opacity:1; transform:none; animation-play-state:running; }
 @keyframes btn-rim { to { --rim:570deg; } }
 @media (prefers-reduced-motion:reduce) { .button::before,.header-cta::before,.story-open::before,.story-link::before { animation:none; transition:opacity .3s ease; } }
+/* Touch screens: no live blur. Backdrop blur behind the sticky header and blur filters on large glows are repainted on
+   every scroll frame, which makes iPhones stutter and run out of memory; solid fills and soft gradients look nearly the same. */
+@media (hover:none) {
+  .site-header { background:rgba(10,10,12,.94); -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .hero-orb,.contact-glow,.gfx-brand::before,.site-scene::after { filter:none; }
+  .hero-orb,.contact-glow { opacity:.2; }
+  .gfx-brand::before { opacity:.3; }
+  .mk-chip,.mk-card,.st-pill,.gfx-format { -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .will-reveal,.will-reveal.is-in { filter:none; }
+}

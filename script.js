@@ -229,7 +229,7 @@ if ('IntersectionObserver' in window) {
   const idleObserver = new IntersectionObserver((entries) => {
     entries.forEach(({ target, isIntersecting }) => target.classList.toggle('is-offscreen', !isIntersecting));
   }, { rootMargin:'200px 0px' });
-  document.querySelectorAll('.gfx-brand, .client-row, .site-preview, .contact-panel').forEach((section) => idleObserver.observe(section));
+  document.querySelectorAll('.gfx-brand, .client-row, .site-preview, .mail-list, .contact-panel').forEach((section) => idleObserver.observe(section));
 }
 
 // Motion covers load and play only while on screen; with reduced motion the poster stays.
@@ -239,16 +239,28 @@ if (coverVisuals.length && 'IntersectionObserver' in window) {
     entries.forEach(({ target, isIntersecting }) => {
       const videos = [...target.querySelectorAll('.cover-video')].filter((video) => video.offsetParent !== null);
       if (!isIntersecting || reduceMotion.matches) { videos.forEach((video) => video.pause()); return; }
-      videos.forEach((video) => { video.preload = 'auto'; video.play().catch(() => {}); });
+      videos.forEach((video) => {
+        if (video.dataset.src) { video.src = video.dataset.src; video.removeAttribute('data-src'); }
+        video.preload = 'auto';
+        video.play().catch(() => {});
+      });
     });
   }, { threshold:0.25 });
   // Posters attach a screen ahead of the card, and only for the variant this layout shows.
+  // Touch screens also drop a cover's video once it is more than a screen away, freeing its decoder memory, and reload it on return.
+  const touchScreen = window.matchMedia('(hover: none)');
   const posterObserver = new IntersectionObserver((entries) => {
-    entries.filter((entry) => entry.isIntersecting).forEach(({ target }) => {
-      target.querySelectorAll('.cover-video[data-poster]').forEach((video) => {
-        if (video.offsetParent === null) return;
-        video.poster = video.dataset.poster;
-        video.removeAttribute('data-poster');
+    entries.forEach(({ target, isIntersecting }) => {
+      target.querySelectorAll('.cover-video').forEach((video) => {
+        if (isIntersecting) {
+          if (video.dataset.src) { video.src = video.dataset.src; video.removeAttribute('data-src'); }
+          if (video.dataset.poster && video.offsetParent !== null) { video.poster = video.dataset.poster; video.removeAttribute('data-poster'); }
+        } else if (touchScreen.matches && video.getAttribute('src')) {
+          video.pause();
+          video.dataset.src = video.getAttribute('src');
+          video.removeAttribute('src');
+          video.load();
+        }
       });
     });
   }, { rootMargin:'100% 0px' });
@@ -304,7 +316,9 @@ const setArtworkZoom = (value) => {
   const availableWidth = artworkZoomViewport.clientWidth - (Number.parseFloat(viewportStyle.paddingLeft) || 0) - (Number.parseFloat(viewportStyle.paddingRight) || 0);
   const availableHeight = artworkZoomViewport.clientHeight - (Number.parseFloat(viewportStyle.paddingTop) || 0) - (Number.parseFloat(viewportStyle.paddingBottom) || 0);
   const [, ratioW = 4, ratioH = 5] = (artworkZoomContent.style.aspectRatio.match(/([\d.]+)\s*\/\s*([\d.]+)/) || []).map(Number);
-  const baseWidth = Math.max(180, Math.min(availableWidth, availableHeight * ratioW / ratioH));
+  // Long emails fit the width and scroll; everything else fits the whole artwork on screen.
+  const tall = artworkZoomViewport.classList.contains('is-tall');
+  const baseWidth = tall ? Math.min(availableWidth, 600) : Math.max(180, Math.min(availableWidth, availableHeight * ratioW / ratioH));
   artworkZoomContent.style.width = `${baseWidth * artworkZoom / 100}px`;
   artworkZoomContent.classList.toggle('is-zoomed', artworkZoom > 100);
   artworkZoomViewport.classList.toggle('is-zoomed', artworkZoom > 100);
@@ -318,8 +332,20 @@ const openArtwork = (tile) => {
   if (expandedImage.dataset.full) expandedImage.src = expandedImage.dataset.full;
   expandedImage.className = '';
   expandedImage.setAttribute('aria-label', `Click to zoom in on ${brand} ${label}`);
+  presentArtwork(expandedImage, getComputedStyle(tile).aspectRatio || '4/5', false);
+};
+const openEmail = (brand, tab) => {
+  artworkDialog.querySelector('[data-artwork-title]').textContent = `${brand} · ${tab.textContent}`;
+  const image = new Image(tab.dataset.w, tab.dataset.h);
+  image.src = tab.dataset.full;
+  image.alt = `${brand} email: ${tab.textContent}`;
+  image.decoding = 'async';
+  presentArtwork(image, `${tab.dataset.w} / ${tab.dataset.h}`, true);
+};
+const presentArtwork = (expandedImage, ratio, tall) => {
   expandedImage.tabIndex = 0;
-  artworkZoomContent.style.aspectRatio = getComputedStyle(tile).aspectRatio || '4/5';
+  artworkZoomViewport.classList.toggle('is-tall', tall);
+  artworkZoomContent.style.aspectRatio = ratio;
   artworkZoomContent.replaceChildren(expandedImage);
   artworkDialog.hidden = false;
   artworkDialog.classList.add('is-open');
@@ -404,6 +430,30 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && artworkDialog.classList.contains('is-open')) closeArtwork();
 });
 
+// Email cards: the phone scrolls the chosen email, and tapping the phone opens the full-size version.
+document.querySelectorAll('.mail-card.has-emails').forEach((card) => {
+  const brand = card.querySelector('h3').textContent.trim();
+  const phone = card.querySelector('.mail-phone');
+  const page = card.querySelector('.mail-page');
+  const tabs = [...card.querySelectorAll('.mail-tab')];
+  let current = tabs[0];
+  tabs.forEach((tab) => tab.addEventListener('click', () => {
+    if (tab === current) return;
+    current = tab;
+    tabs.forEach((other) => other.setAttribute('aria-pressed', String(other === tab)));
+    page.width = tab.dataset.w;
+    page.height = tab.dataset.h;
+    page.src = tab.dataset.src;
+    page.style.setProperty('--scroll', `${Math.round(tab.dataset.h / tab.dataset.w * 6)}s`);
+    // Restart the scroll so each email starts from its header.
+    page.style.animation = 'none';
+    void page.offsetWidth;
+    page.style.animation = '';
+    phone.setAttribute('aria-label', `Open the full ${brand} email: ${tab.textContent}`);
+  }));
+  phone.addEventListener('click', () => openEmail(brand, current));
+});
+
 const artTiles = [...document.querySelectorAll('.gfx-card')];
 // Only tiles that already hold a real artwork image open the zoom lightbox; brand placeholders stay static.
 artTiles.filter((tile) => tile.querySelector('.art-image')).forEach((tile) => {
@@ -458,8 +508,16 @@ if (storyDialog && projectCards.length) {
 
 const stackQuery = window.matchMedia('(min-width: 641px) and (min-height: 701px)');
 let stackFrame = 0;
+let stackCleared = false;
 const updateStack = () => {
   stackFrame = 0;
+  // Phones and short screens don't stack the cards, so after clearing once there is nothing to do per scroll frame.
+  if (!stackQuery.matches || reduceMotion.matches) {
+    if (!stackCleared) projectCards.forEach((card) => card.style.removeProperty('--stack'));
+    stackCleared = true;
+    return;
+  }
+  stackCleared = false;
   projectCards.forEach((card, index) => {
     const next = projectCards[index + 1];
     if (!next || !stackQuery.matches || reduceMotion.matches) {
