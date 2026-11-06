@@ -275,6 +275,9 @@ html.has-dialog { overflow:hidden; }
 .gfx-index a { padding:8px 13px; border:1px solid rgba(255,255,255,.14); border-radius:999px; background:rgba(255,255,255,.03); color:#c9c6cf; font-size:12px; white-space:nowrap; transition:border-color .25s ease,background .25s ease,color .25s ease; }
 .gfx-index a:hover { border-color:rgba(143,180,212,.5); background:var(--accent-soft); color:#fff; }
 .gfx-brand { position:relative; padding:clamp(56px,6vw,84px) 0 clamp(50px,6vw,80px); scroll-margin-top:60px; background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--brand) 18%,#060607) 24%,color-mix(in srgb,var(--brand) 18%,#060607) 76%,transparent 100%); }
+/* Brand panels render only near the screen, so off-screen reels and their images hold no memory (iOS Safari runs out otherwise). */
+.gfx-brand { content-visibility:auto; contain-intrinsic-size:auto 1000px; }
+.is-offscreen *,.is-offscreen *::before,.is-offscreen *::after { animation-play-state:paused!important; }
 .gfx-brand::before { position:absolute; top:28%; left:50%; width:min(70vw,900px); aspect-ratio:1.6; border-radius:50%; background:radial-gradient(closest-side,color-mix(in srgb,var(--brand) 55%,transparent),transparent); filter:blur(40px); opacity:.45; content:""; transform:translateX(-50%); pointer-events:none; }
 .gfx-head { position:relative; display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:clamp(16px,2vw,24px); }
 .gfx-head-brand { display:flex; align-items:center; gap:16px; }

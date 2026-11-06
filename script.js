@@ -80,9 +80,16 @@ const loadScene = (scene) => scene?.querySelectorAll('img[data-src]').forEach((i
   img.removeAttribute('data-src');
   img.removeAttribute('data-src-sm');
 });
+// On small screens a scene's images are released once it is no longer shown, so only one site's captures stay in memory.
+const releaseScene = (scene) => scene.querySelectorAll('img.site-page[src]').forEach((img) => {
+  img.dataset.src = img.dataset.src || img.getAttribute('src');
+  img.dataset.srcSm = img.getAttribute('src');
+  img.removeAttribute('src');
+});
 const showSite = (row) => {
   siteRows.forEach((item) => item.classList.toggle('is-active', item === row));
   siteShots.forEach((shot) => shot.classList.toggle('is-active', shot.dataset.site === row.dataset.site));
+  if (compactSites.matches) siteShots.filter((shot) => shot.dataset.site !== row.dataset.site).forEach(releaseScene);
   loadScene(siteShots.find((shot) => shot.dataset.site === row.dataset.site));
   if (previewUrl) previewUrl.textContent = row.dataset.url;
 };
@@ -216,6 +223,14 @@ document.querySelectorAll('.gfx-stage').forEach((stage) => {
 });
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// Looping animations pause while their section is off screen, for browsers without content-visibility.
+if ('IntersectionObserver' in window) {
+  const idleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(({ target, isIntersecting }) => target.classList.toggle('is-offscreen', !isIntersecting));
+  }, { rootMargin:'200px 0px' });
+  document.querySelectorAll('.gfx-brand, .client-row, .site-preview, .contact-panel').forEach((section) => idleObserver.observe(section));
+}
 
 // Motion covers load and play only while on screen; with reduced motion the poster stays.
 const coverVisuals = [...document.querySelectorAll('.project-visual')].filter((visual) => visual.querySelector('.cover-video'));
