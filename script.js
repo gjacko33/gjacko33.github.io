@@ -57,7 +57,10 @@ if (statTicker) {
   };
 
   // A timer drives the rotation; the progress bar is decoration, so a paused or throttled animation can't stall it.
-  window.setInterval(() => showStat((activeStat + 1) % slides.length), 3000);
+  // It skips its turns while the ticker is off screen or the tab is hidden.
+  let statOnScreen = true;
+  if ('IntersectionObserver' in window) new IntersectionObserver(([entry]) => { statOnScreen = entry.isIntersecting; }).observe(statTicker);
+  window.setInterval(() => { if (statOnScreen && !document.hidden) showStat((activeStat + 1) % slides.length); }, 3000);
 }
 
 // Each logo row scrolls by half its width, so it needs a second, hidden copy of its tiles to loop seamlessly.
@@ -229,7 +232,26 @@ if ('IntersectionObserver' in window) {
   const idleObserver = new IntersectionObserver((entries) => {
     entries.forEach(({ target, isIntersecting }) => target.classList.toggle('is-offscreen', !isIntersecting));
   }, { rootMargin:'200px 0px' });
-  document.querySelectorAll('.gfx-brand, .client-row, .site-preview, .mail-list, .contact-panel').forEach((section) => idleObserver.observe(section));
+  document.querySelectorAll('.gfx-brand, .client-row, .site-preview, .mail-showcase, .contact-panel').forEach((section) => idleObserver.observe(section));
+}
+
+// The reels' brand fonts are only needed in Graphics, so their stylesheet loads once that section is close.
+const graphicsSection = document.querySelector('[data-fonts]');
+if (graphicsSection) {
+  const loadReelFonts = () => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = graphicsSection.dataset.fonts;
+    document.head.append(link);
+  };
+  if ('IntersectionObserver' in window) {
+    const fontObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      fontObserver.disconnect();
+      loadReelFonts();
+    }, { rootMargin:'1500px 0px' });
+    fontObserver.observe(graphicsSection);
+  } else loadReelFonts();
 }
 
 // Motion covers load and play only while on screen; with reduced motion the poster stays.
@@ -334,13 +356,13 @@ const openArtwork = (tile) => {
   expandedImage.setAttribute('aria-label', `Click to zoom in on ${brand} ${label}`);
   presentArtwork(expandedImage, getComputedStyle(tile).aspectRatio || '4/5', false);
 };
-const openEmail = (brand, tab) => {
-  artworkDialog.querySelector('[data-artwork-title]').textContent = `${brand} · ${tab.textContent}`;
-  const image = new Image(tab.dataset.w, tab.dataset.h);
-  image.src = tab.dataset.full;
-  image.alt = `${brand} email: ${tab.textContent}`;
+const openEmail = (brand, name, source) => {
+  artworkDialog.querySelector('[data-artwork-title]').textContent = `${brand} · ${name}`;
+  const image = new Image(source.dataset.w, source.dataset.h);
+  image.src = source.dataset.full;
+  image.alt = `${brand} email: ${name}`;
   image.decoding = 'async';
-  presentArtwork(image, `${tab.dataset.w} / ${tab.dataset.h}`, true);
+  presentArtwork(image, `${source.dataset.w} / ${source.dataset.h}`, true);
 };
 const presentArtwork = (expandedImage, ratio, tall) => {
   expandedImage.tabIndex = 0;
@@ -430,29 +452,68 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && artworkDialog.classList.contains('is-open')) closeArtwork();
 });
 
-// Email cards: the phone scrolls the chosen email, and tapping the phone opens the full-size version.
-document.querySelectorAll('.mail-card.has-emails').forEach((card) => {
-  const brand = card.querySelector('h3').textContent.trim();
-  const phone = card.querySelector('.mail-phone');
-  const page = card.querySelector('.mail-page');
-  const tabs = [...card.querySelectorAll('.mail-tab')];
-  let current = tabs[0];
-  tabs.forEach((tab) => tab.addEventListener('click', () => {
-    if (tab === current) return;
-    current = tab;
-    tabs.forEach((other) => other.setAttribute('aria-pressed', String(other === tab)));
-    page.width = tab.dataset.w;
-    page.height = tab.dataset.h;
-    page.src = tab.dataset.src;
-    page.style.setProperty('--scroll', `${Math.round(tab.dataset.h / tab.dataset.w * 6)}s`);
-    // Restart the scroll so each email starts from its header.
-    page.style.animation = 'none';
-    void page.offsetWidth;
-    page.style.animation = '';
-    phone.setAttribute('aria-label', `Open the full ${brand} email: ${tab.textContent}`);
+// Email showcase: the brand list picks an email, the phone plays it, and tapping the phone opens the full-size version.
+const mailShowcase = document.querySelector('.mail-showcase');
+if (mailShowcase) {
+  const phone = mailShowcase.querySelector('.mail-phone');
+  const page = mailShowcase.querySelector('.mail-page');
+  const captionBrand = mailShowcase.querySelector('.mail-caption-brand');
+  const captionName = mailShowcase.querySelector('.mail-caption-name');
+  const brands = [...mailShowcase.querySelectorAll('.mail-brand')];
+  const items = [...mailShowcase.querySelectorAll('.mail-item')];
+  const brandOf = (item) => item.closest('.mail-brand');
+  const brandName = (group) => group.querySelector('.mail-logo').alt;
+  const emailName = (item) => item.querySelector('.mail-item-name').textContent;
+  let current = items.find((item) => item.getAttribute('aria-pressed') === 'true') || items[0];
+  let swap = 0;
+
+  const openBrand = (group) => brands.forEach((other) => {
+    const open = other === group;
+    other.classList.toggle('is-open', open);
+    other.querySelector('.mail-brand-head').setAttribute('aria-expanded', String(open));
+    // Collapsed lists stay out of the tab order.
+    other.querySelector('.mail-items-wrap').inert = !open;
+  });
+
+  const showEmail = (item, bringPhoneIntoView) => {
+    if (item === current) return;
+    current = item;
+    const group = brandOf(item);
+    items.forEach((other) => other.setAttribute('aria-pressed', String(other === item)));
+    mailShowcase.style.setProperty('--mail-tone', group.style.getPropertyValue('--tone'));
+    captionBrand.textContent = brandName(group);
+    captionName.textContent = emailName(item);
+    phone.setAttribute('aria-label', `Open the full ${brandName(group)} email: ${emailName(item)}`);
+    // Fade the old email out, swap in the new one once it has decoded, and restart the scroll from its header.
+    const ticket = ++swap;
+    page.classList.add('is-swapping');
+    const next = new Image();
+    next.src = item.dataset.src;
+    Promise.all([next.decode().catch(() => {}), new Promise((resolve) => setTimeout(resolve, 350))]).then(() => {
+      if (ticket !== swap) return;
+      page.width = item.dataset.w;
+      page.height = item.dataset.h;
+      page.src = item.dataset.src;
+      page.style.setProperty('--scroll', `${Math.round(item.dataset.h / item.dataset.w * 6)}s`);
+      page.style.animation = 'none';
+      void page.offsetWidth;
+      page.style.animation = '';
+      page.classList.remove('is-swapping');
+    });
+    // On one-column layouts the list sits below the phone, so bring the phone back up.
+    const box = phone.getBoundingClientRect();
+    if (bringPhoneIntoView && (box.bottom < 80 || box.top > innerHeight)) phone.scrollIntoView({ behavior:reduceMotion.matches ? 'auto' : 'smooth', block:'center' });
+  };
+
+  brands.forEach((group) => group.querySelector('.mail-brand-head').addEventListener('click', () => {
+    if (group.classList.contains('is-open')) return;
+    openBrand(group);
+    showEmail(group.querySelector('.mail-item'), false);
   }));
-  phone.addEventListener('click', () => openEmail(brand, current));
-});
+  items.forEach((item) => item.addEventListener('click', () => showEmail(item, true)));
+  phone.addEventListener('click', () => openEmail(brandName(brandOf(current)), emailName(current), current));
+  openBrand(brandOf(current));
+}
 
 const artTiles = [...document.querySelectorAll('.gfx-card')];
 // Only tiles that already hold a real artwork image open the zoom lightbox; brand placeholders stay static.

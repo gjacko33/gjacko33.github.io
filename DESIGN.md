@@ -96,7 +96,7 @@ The other sites in the Websites list each carry their own `--tone` on their `.si
 Rules:
 - Big headings use negative tracking and line heights under 1. Lines are meant to touch.
 - Numbers in counters and stats use `font-variant-numeric: tabular-nums`.
-- Labels are uppercase and spaced, with counts written like `14 SITES`, `04 BRANDS` and `STORY 01`.
+- Labels are uppercase and spaced, with counts written like `13 SITES`, `04 BRANDS` and `STORY 01`.
 - Body copy stays at 60 to 62ch or less.
 
 ### The highlight word
@@ -128,8 +128,8 @@ Use it on one word only, for example "Websites I've *designed.*" or "Graphic *pl
 
 | Query | Changes |
 |---|---|
-| `max-width: 900px` | Two-column layouts stack, and story cards show the 16:9 cover. Websites switches to a sticky 4:3 showcase driven by the row in the middle of the screen. Email goes to 2 columns. |
-| `max-width: 640px` | Nav collapses into a menu button and dropdown. Headings stack. Graphics and Email become horizontal swipe rails (`scroll-snap`). |
+| `max-width: 900px` | Two-column layouts stack, and story cards show the 16:9 cover. Websites switches to a sticky 4:3 showcase driven by the row in the middle of the screen. Email stacks the phone above the list. |
+| `max-width: 640px` | Nav collapses into a menu button and dropdown. Headings stack. Graphics becomes a horizontal swipe rail (`scroll-snap`). |
 | `min-width: 641px` and `max-height: 700px` | Story cards stop pinning and grow with their content. |
 | `hover: none` | Live blur is removed (see Performance). |
 | `prefers-reduced-motion: reduce` | Animations and transitions are close to off, and the intro is skipped. |
@@ -138,7 +138,7 @@ Use it on one word only, for example "Websites I've *designed.*" or "Graphic *pl
 
 | Token | Value | Use |
 |---|---|---|
-| `--r-card` | `22px` | Cards, Email stages |
+| `--r-card` | `22px` | Cards, the Email stage |
 | `--r-image` | `16px` | Images |
 | `--r-pill` | `999px` | Buttons, pills, nav bar |
 | Story card | `28px` | `.project-card` |
@@ -181,10 +181,11 @@ Up to 1080px wide with a 28px radius on `#0d0d10`, a blurred backdrop and a stic
 - The devices stay still and only the page inside scrolls (`site-scroll`, alternating, `--scroll` seconds). Desktop and phone share the same duration.
 
 ### Email showcase
-- A 4-column grid of 4:5 stages, each with a tone glow and a faint grid.
-- A photo of a hand holding a phone (`assets/emails/hand-phone.webp`) sits on top of the stage. Its screen is cut out, and the email sits underneath at `top 10%`, `left 24.8%`, `width 50.4%`.
-- The email scrolls with the same `site-scroll` animation. Tabs switch between emails, and tapping the phone opens the full email in the lightbox at 600px wide.
-- Brands without designs yet show a CSS placeholder email in the brand tone with a "Coming soon" status.
+- Two columns: one phone on the left (5fr), the brand list on the right (6fr). Below 900px they stack, phone first.
+- The phone is pure CSS: a 9:19.5 frame with a dynamic island, side buttons and a status bar (time and battery). Sizes use `cqw` from `.mail-device`, so the whole phone scales from one height.
+- It sits on a stage with two soft radial glows in the open brand's `--mail-tone`. The variable is registered with `@property`, so the glow fades between brands over 1.2s instead of jumping.
+- The list is an accordion with one brand open at a time. Each brand head shows its logo and email count. HugGooling and Supps247 logos stay grey until opened; MKP and iilumo stay white.
+- Picking an email fades the screen out, swaps the image once it has decoded, and restarts the `site-scroll` animation from the header. Tapping the phone opens the full email in the lightbox at 600px wide.
 
 ### Graphics panels
 - Each brand panel is a full-width band tinted with `--brand`, with a blurred brand glow behind it.
@@ -207,7 +208,7 @@ Two rows of logo tiles (190 × 96, 18px radius) scroll in opposite directions (4
 | Intro (once per session) | The GJ mark draws in (1.5s), the accent line fills, then a feathered mask lifts the curtain. Repeat visits in the same session skip it (`sessionStorage` key `gj-intro`, `.no-intro` class). |
 | Hero entrance | `hero-in`, 1.2s, staggered about 80ms per line |
 | Hero portrait | A soft circle (110 to 160px) follows the cursor or finger and reveals an alternate portrait underneath |
-| Hover lift | 2px for buttons, `scale(1.03)` from the bottom for email phones |
+| Hover lift | 2px for buttons, 6px for the email phone |
 | Page scroll in devices | `site-scroll`: holds the top for 8%, eases to the bottom, holds, then reverses |
 | Story reels | Loops of 6 to 11s built from `reel-io` and per-brand keyframes |
 
@@ -232,14 +233,16 @@ These rules exist because iOS Safari crashed ("A problem repeatedly occurred") o
 - No live blur on touch screens. Under `hover: none` the header has no backdrop blur, the glows have no `filter: blur`, the reel chips have no backdrop blur, and reveals don't blur.
 - Graphics panels use `content-visibility: auto` with `contain-intrinsic-size: auto 1000px`.
 - Cover videos play only while visible. On touch screens their `src` is removed when far away and restored on approach.
-- Fonts: Space Grotesk and Instrument Serif load in `<head>`. Client fonts load asynchronously (`media="print" onload`) with `text=` subsets.
+- Fonts: Space Grotesk (variable, 300–600) and Instrument Serif are self-hosted in `assets/fonts/` (latin and latin-ext woff2, `font-display:swap`), and the two hero files are preloaded, so first paint never waits on Google. The client wall's lockup fonts load asynchronously (`media="print" onload`) with `text=` subsets. The reel fonts sit in `data-fonts` on `#graphics` and only load once that section is 1500px away.
+- Logos are stored at about 2.25× their largest display height. Heavy SVGs keep only the coordinate precision their size needs.
+- Timers that only animate on screen (the About stat ticker, reels) skip their turns while off screen.
 - After editing `styles.css` or `script.js`, bump the version query in `index.html` (`?v=`) so caches refresh.
 
 ## 10. Copy voice
 
 - Short, plain and specific. Name the client, the deliverable and the real number. Don't invent stats.
 - Headings follow a "[Thing] I've *designed.*" pattern with a full stop.
-- Labels are uppercase counts and states, such as `14 SITES`, `STORY 02 · 2026` and `Coming soon`.
+- Labels are uppercase counts and states, such as `13 SITES`, `STORY 02 · 2026` and `Coming soon`.
 - Interface copy is in English.
 
 ## 11. Do and don't
