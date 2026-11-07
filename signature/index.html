@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Email Signature</title>
+<style>
+@font-face { font-family:'Space Grotesk'; font-weight:300 600; font-display:swap; src:url(../assets/fonts/space-grotesk-latin.woff2) format('woff2'); }
+@font-face { font-family:'Instrument Serif'; font-style:italic; font-display:swap; src:url(../assets/fonts/instrument-serif-italic-latin.woff2) format('woff2'); }
+:root { --ease:cubic-bezier(.2,.7,.25,1); }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; background:radial-gradient(120% 80% at 50% 0%,#2b2b30 0%,#121214 45%,#060607 100%) fixed,#060607; color:#c4c4cb; font:15px/1.7 'Space Grotesk',sans-serif; -webkit-font-smoothing:antialiased; }
+main { width:min(100% - 32px,720px); margin:0 auto; padding:72px 0 96px; }
+.kicker { margin:0 0 14px; color:#7ff3dc; font-size:10px; font-weight:500; letter-spacing:.13em; text-transform:uppercase; }
+h1 { margin:0; color:#f7f6f8; font-size:clamp(44px,8vw,72px); font-weight:500; line-height:.95; letter-spacing:-.07em; }
+h1 em { margin:0 -.06em; padding:0 .06em; font-family:'Instrument Serif',serif; font-weight:400; letter-spacing:-.02em; background:linear-gradient(110deg,#7ff3dc 0%,#63c9ff 34%,#6f86ff 66%,#a07cff 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.lede { max-width:56ch; margin:18px 0 0; color:#9a9aa3; font-size:14px; }
+
+.label { display:flex; justify-content:space-between; margin:40px 0 10px; color:#a6a3ad; font-size:10px; font-weight:500; letter-spacing:.13em; text-transform:uppercase; }
+.inbox { padding:28px 24px; border-radius:22px; border:1px solid rgba(255,255,255,.12); overflow:hidden; }
+.inbox.light { background:#fff; color:#202124; }
+.inbox.dark { background:#1f1f1f; color:#e3e3e3; }
+.inbox .body { margin:0 0 22px; font:14px/1.6 Arial,Helvetica,sans-serif; }
+.inbox .sig { overflow-x:auto; }
+
+.actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+.button { position:relative; display:inline-flex; align-items:center; gap:9px; min-height:46px; padding:0 22px; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.015)); color:#f7f6f8; font:500 12px 'Space Grotesk',sans-serif; letter-spacing:.02em; cursor:pointer; text-decoration:none; transition:transform .4s var(--ease),border-color .4s var(--ease),background .4s var(--ease); }
+.button:hover,.button:focus-visible { transform:translateY(-2px); border-color:rgba(143,180,212,.55); background:linear-gradient(135deg,rgba(127,243,220,.12) 0%,rgba(99,201,255,.1) 45%,rgba(126,112,255,.14) 100%); outline:none; }
+.button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.status { min-height:20px; margin:12px 0 0; color:#7ff3dc; font-size:12px; }
+
+h2 { margin:56px 0 0; color:#f7f6f8; font-size:28px; font-weight:500; line-height:1; letter-spacing:-.05em; }
+.steps { display:grid; gap:12px; margin:22px 0 0; padding:0; list-style:none; }
+.steps li { padding:18px 20px; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.01)); font-size:14px; }
+.steps b { display:block; margin-bottom:4px; color:#f7f6f8; font-weight:500; }
+.note { margin:22px 0 0; color:#6f6f78; font-size:13px; }
+code { color:#c9c6cf; font-size:12px; }
+
+@media (prefers-reduced-motion: reduce) { .button { transition:none; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Gilang Jecko · Email signature</p>
+  <h1>Signature, <em>animated.</em></h1>
+  <p class="lede">A 6-second GIF card with your portfolio, WhatsApp and LinkedIn, plus clickable links underneath, since text inside an image can’t be tapped. The first frame is the finished card, so Outlook on Windows, which never plays GIFs, still shows the full design.</p>
+
+  <div class="label"><span>Light inbox</span><span>520 × 188</span></div>
+  <div class="inbox light">
+    <p class="body">Hi there,<br />Thanks for the brief. I'll send the first concepts on Friday.<br /><br />Best,</p>
+    <div class="sig" data-sig></div>
+  </div>
+
+  <div class="label"><span>Dark inbox</span><span>457 KB · 6s loop · 25fps</span></div>
+  <div class="inbox dark">
+    <div class="sig" data-sig></div>
+  </div>
+
+  <div class="actions">
+    <button class="button" type="button" id="copy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5" /><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8" /></svg>Copy signature</button>
+    <button class="button" type="button" id="copy-html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" /></svg>Copy HTML</button>
+    <a class="button" href="../assets/signature/gilang-jecko-signature.gif" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14" /></svg>Download GIF</a>
+  </div>
+  <p class="status" id="status" role="status"></p>
+
+  <h2>Adding it to your mail app</h2>
+  <ol class="steps">
+    <li><b>Gmail</b>Click <i>Copy signature</i>, then go to Settings → See all settings → General → Signature, create a new one and paste. Save at the bottom of the page.</li>
+    <li><b>Apple Mail</b>Mail → Settings → Signatures, add a signature, untick <i>Always match my default message font</i> and paste. Close Settings so it saves.</li>
+    <li><b>Outlook</b>Settings → Accounts → Signatures, create a new one and paste. The new Outlook and Outlook on the web play the animation; classic Outlook for Windows shows the first frame.</li>
+  </ol>
+  <p class="note">The GIF loads from <code>gjacko33.github.io/assets/signature/</code>, so push this folder before pasting it anywhere. The card is recorded from <code>signature/card.html</code>; edit that page and re-record it to change the design.</p>
+</main>
+
+<template id="sig-html"><table cellpadding="0" cellspacing="0" border="0" role="presentation" width="520" style="border-collapse:collapse;width:100%;max-width:520px;">
+  <tr>
+    <td style="padding:0 0 10px 0;">
+      <a href="https://gjacko33.github.io/" target="_blank" style="text-decoration:none;"><img src="https://gjacko33.github.io/assets/signature/gilang-jecko-signature.gif" width="520" height="188" alt="Gilang Jecko · Creative Director, UI/UX &amp; Brand Designer · gjacko33.github.io · WhatsApp +62 895-3600-86569 · linkedin.com/in/gilangjecko33" style="display:block;width:520px;max-width:100%;height:auto;border:0;outline:none;" /></a>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:0 0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#8a8a93;">
+      <a href="https://gjacko33.github.io/" target="_blank" style="color:#5466e8;text-decoration:none;">Portfolio</a>&nbsp;&nbsp;·&nbsp; <a href="https://wa.me/62895360086569" target="_blank" style="color:#5466e8;text-decoration:none;">WhatsApp</a>&nbsp;&nbsp;·&nbsp; <a href="https://www.linkedin.com/in/gilangjecko33" target="_blank" style="color:#5466e8;text-decoration:none;">LinkedIn</a>&nbsp;&nbsp;·&nbsp; <a href="mailto:gilangjeko@gmail.com" style="color:#5466e8;text-decoration:none;">gilangjeko@gmail.com</a>
+    </td>
+  </tr>
+</table></template>
+
+<script>
+  const html = document.getElementById('sig-html').innerHTML.trim();
+  // The preview uses the local GIF so it works before the folder is pushed. The copied signature keeps the live URL.
+  const preview = html.replace('https://gjacko33.github.io/assets/', '../assets/');
+  document.querySelectorAll('[data-sig]').forEach((el) => { el.innerHTML = preview; });
+
+  const status = document.getElementById('status');
+  const say = (text) => { status.textContent = text; };
+
+  async function copyRich() {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob(['Gilang Jecko · Creative Director, UI/UX & Brand Designer\ngjacko33.github.io · WhatsApp +62 895-3600-86569\nlinkedin.com/in/gilangjecko33 · gilangjeko@gmail.com'], { type: 'text/plain' }),
+      })]);
+      say('Copied. Paste it into your mail app’s signature box.');
+    } catch {
+      // Older browsers: select a rendered copy and use the legacy copy command.
+      const holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:-9999px;top:0;';
+      holder.innerHTML = html;
+      document.body.append(holder);
+      const range = document.createRange();
+      range.selectNodeContents(holder);
+      const sel = getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      const ok = document.execCommand('copy');
+      sel.removeAllRanges();
+      holder.remove();
+      say(ok ? 'Copied. Paste it into your mail app’s signature box.' : 'Copy was blocked. Select the light preview above and copy it by hand.');
+    }
+  }
+
+  async function copyCode() {
+    try { await navigator.clipboard.writeText(html); say('HTML copied.'); }
+    catch { say('Copy was blocked by the browser.'); }
+  }
+
+  document.getElementById('copy').addEventListener('click', copyRich);
+  document.getElementById('copy-html').addEventListener('click', copyCode);
+</script>
+</body>
+</html>
