@@ -37,7 +37,8 @@ A film-grain SVG noise sits over the whole page at 16% opacity (`body::before`).
 | `--glass-tint` | `linear-gradient(90deg, #6fc9b8 0%, #6aaec4 38%, #7d8ae0 72%, #7a68ea 100%)` | Thin bars, such as the stat progress |
 | `--highlight` | Dark glass `#24344d → #121a30`, lit by teal and violet radials with a white specular streak | Fill for the serif highlight word |
 | `--glass-rim` | `rgba(232,240,255,.62)` | Text stroke on the highlight word |
-| `--orb` | Radial: `#7ff3dc → #63c9ff → #7e70ff → #1f2470` | Hero and contact glow orbs (blurred, about 30% opacity) |
+| `--orb` | Radial: `#7ff3dc → #63c9ff → #7e70ff → #1f2470` | Legacy orb, no longer used on the page |
+| `--glow-soft` | Violet radial, 30% alpha at the centre easing to 0 at the edge, with a faint teal core | Hero and contact glows. The falloff lives in the stops, so it needs no blur and looks the same on touch screens |
 
 ### Text
 

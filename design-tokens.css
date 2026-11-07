@@ -43,6 +43,9 @@
   /* Glow orb */
   --orb: radial-gradient(circle at 45% 62%, #7ff3dc 0%, #63c9ff 22%, #7e70ff 42%, #1f2470 60%, transparent 74%);
   --orb-blur: 60px;
+  /* Soft glow with the falloff built into the stops, so it needs no blur filter and has no visible edge. */
+  --glow-soft: radial-gradient(closest-side at 46% 56%, rgba(127,243,220,.10), rgba(127,243,220,.05) 40%, rgba(127,243,220,0) 75%),
+               radial-gradient(closest-side, rgba(126,112,255,.30) 0%, rgba(118,118,255,.25) 16%, rgba(104,132,255,.17) 34%, rgba(88,112,236,.10) 52%, rgba(64,76,196,.045) 70%, rgba(40,44,140,.012) 86%, rgba(31,36,112,0) 100%);
   --orb-opacity: .35;
 
   /* Shape */
