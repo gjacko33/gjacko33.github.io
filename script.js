@@ -457,6 +457,8 @@ const mailShowcase = document.querySelector('.mail-showcase');
 if (mailShowcase) {
   const phone = mailShowcase.querySelector('.mail-phone');
   const page = mailShowcase.querySelector('.mail-page');
+  const view = mailShowcase.querySelector('.mail-view');
+  const scrollButtons = [...mailShowcase.querySelectorAll('.mail-scroll-btn')];
   const captionBrand = mailShowcase.querySelector('.mail-caption-brand');
   const captionName = mailShowcase.querySelector('.mail-caption-name');
   const brands = [...mailShowcase.querySelectorAll('.mail-brand')];
@@ -466,6 +468,56 @@ if (mailShowcase) {
   const emailName = (item) => item.querySelector('.mail-item-name').textContent;
   let current = items.find((item) => item.getAttribute('aria-pressed') === 'true') || items[0];
   let swap = 0;
+
+  // Up and down buttons: the first press freezes the auto-scroll where it is, then each press moves 60% of a screen.
+  // Holding a button keeps it going. Picking another email hands control back to the auto-scroll.
+  let manual = false;
+  let offset = 0;
+  const maxOffset = () => Math.max(0, page.offsetHeight - view.clientHeight);
+  const syncScrollButtons = () => {
+    scrollButtons[0].disabled = manual && offset <= 1;
+    scrollButtons[1].disabled = manual && offset >= maxOffset() - 1;
+  };
+  const scrollEmail = (direction) => {
+    if (!manual) {
+      const transform = getComputedStyle(page).transform;
+      offset = transform === 'none' ? 0 : -new DOMMatrixReadOnly(transform).m42;
+      page.style.transform = `translateY(${-offset}px)`;
+      page.classList.add('is-manual');
+      manual = true;
+    }
+    offset = Math.min(maxOffset(), Math.max(0, offset + direction * view.clientHeight * 0.6));
+    page.style.transform = `translateY(${-offset}px)`;
+    syncScrollButtons();
+  };
+  const resetEmailScroll = () => {
+    manual = false;
+    offset = 0;
+    page.classList.remove('is-manual');
+    page.style.transform = '';
+    syncScrollButtons();
+  };
+  scrollButtons.forEach((button) => {
+    const direction = Number(button.dataset.dir);
+    let hold = 0;
+    const release = () => { window.clearTimeout(hold); window.clearInterval(hold); };
+    button.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      scrollEmail(direction);
+      hold = window.setTimeout(() => {
+        hold = window.setInterval(() => (button.disabled ? release() : scrollEmail(direction)), 260);
+      }, 420);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => button.addEventListener(type, release));
+    // Keyboard presses arrive as clicks with no pointer behind them.
+    button.addEventListener('click', (event) => { if (event.detail === 0) scrollEmail(direction); });
+  });
+  window.addEventListener('resize', () => {
+    if (!manual) return;
+    offset = Math.min(offset, maxOffset());
+    page.style.transform = `translateY(${-offset}px)`;
+    syncScrollButtons();
+  }, { passive:true });
 
   const openBrand = (group) => brands.forEach((other) => {
     const open = other === group;
@@ -495,6 +547,7 @@ if (mailShowcase) {
       page.height = item.dataset.h;
       page.src = item.dataset.src;
       page.style.setProperty('--scroll', `${Math.round(item.dataset.h / item.dataset.w * 6)}s`);
+      resetEmailScroll();
       page.style.animation = 'none';
       void page.offsetWidth;
       page.style.animation = '';

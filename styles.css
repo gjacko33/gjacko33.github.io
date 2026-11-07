@@ -294,6 +294,16 @@ html.has-dialog { overflow:hidden; }
 .mail-view::after { position:absolute; inset:0; background:linear-gradient(118deg,transparent 40%,rgba(255,255,255,.1) 50%,transparent 60%); content:""; pointer-events:none; }
 .mail-page { display:block; width:100%; height:auto; transition:opacity .35s ease; animation:site-scroll var(--scroll,20s) cubic-bezier(.45,0,.55,1) infinite alternate; }
 .mail-page.is-swapping { opacity:0; }
+.mail-page.is-manual { animation:none; transition:opacity .35s ease,transform .6s cubic-bezier(.2,.7,.2,1); }
+/* Up and down buttons beside the phone take over from the auto-scroll. The phone stays centred, the buttons sit in the right-hand column. */
+.mail-stage { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:clamp(14px,2.4vw,28px); width:100%; }
+.mail-stage .mail-device { grid-column:2; }
+.mail-scroll { display:flex; flex-direction:column; gap:10px; grid-column:3; justify-self:start; }
+.mail-scroll-btn { display:grid; width:42px; height:42px; padding:0; place-items:center; border:1px solid rgba(255,255,255,.14); border-radius:50%; background:rgba(255,255,255,.04); color:#c9c6cf; cursor:pointer; touch-action:manipulation; -webkit-user-select:none; user-select:none; transition:border-color .25s ease,background-color .25s ease,color .25s ease,opacity .25s ease; }
+.mail-scroll-btn svg { width:16px; height:16px; }
+.mail-scroll-btn:not(:disabled):hover,.mail-scroll-btn:not(:disabled):active { border-color:color-mix(in srgb,var(--mail-tone) 55%,transparent); background:color-mix(in srgb,var(--mail-tone) 14%,transparent); color:#fff; }
+.mail-scroll-btn:focus-visible { outline:2px solid color-mix(in srgb,var(--mail-tone) 70%,#fff); outline-offset:3px; }
+.mail-scroll-btn:disabled { opacity:.32; cursor:default; }
 .mail-caption { display:flex; align-items:baseline; gap:10px; margin:24px 0 0; font-size:13px; }
 .mail-caption-brand { color:#f2f0f5; }
 .mail-caption-name { color:#8e8b95; }
@@ -701,6 +711,10 @@ html.has-dialog { overflow:hidden; }
 }
 @media (max-width:640px) {
   .mail-device { height:clamp(420px,128vw,540px); }
+  .mail-stage { grid-template-columns:minmax(0,1fr); row-gap:16px; }
+  .mail-stage .mail-device { grid-column:1; justify-self:center; }
+  .mail-scroll { flex-direction:row; grid-column:1; justify-self:center; }
+  .mail-scroll-btn { width:44px; height:44px; }
   .mail-brand-head { min-height:68px; }
   .mail-item { font-size:14px; }
   html { scroll-padding-top:80px; }
