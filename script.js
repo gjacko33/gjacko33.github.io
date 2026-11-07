@@ -89,9 +89,19 @@ const releaseScene = (scene) => scene.querySelectorAll('img.site-page[src]').for
   img.dataset.srcSm = img.getAttribute('src');
   img.removeAttribute('src');
 });
+// Each scene holds 3D-transformed layers, so scenes are parked once their fade-out ends and only the shown site renders.
+let parkTimer = 0;
+const parkScenes = () => siteShots.forEach((shot) => shot.classList.toggle('is-parked', !shot.classList.contains('is-active')));
+parkScenes();
 const showSite = (row) => {
   siteRows.forEach((item) => item.classList.toggle('is-active', item === row));
-  siteShots.forEach((shot) => shot.classList.toggle('is-active', shot.dataset.site === row.dataset.site));
+  siteShots.forEach((shot) => {
+    const active = shot.dataset.site === row.dataset.site;
+    shot.classList.toggle('is-active', active);
+    if (active) shot.classList.remove('is-parked');
+  });
+  window.clearTimeout(parkTimer);
+  parkTimer = window.setTimeout(parkScenes, 700);
   if (compactSites.matches) siteShots.filter((shot) => shot.dataset.site !== row.dataset.site).forEach(releaseScene);
   loadScene(siteShots.find((shot) => shot.dataset.site === row.dataset.site));
   if (previewUrl) previewUrl.textContent = row.dataset.url;

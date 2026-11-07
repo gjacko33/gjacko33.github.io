@@ -237,6 +237,8 @@ These rules exist because iOS Safari crashed ("A problem repeatedly occurred") o
 - Fonts: Space Grotesk (variable, 300–600) and Instrument Serif are self-hosted in `assets/fonts/` (latin and latin-ext woff2, `font-display:swap`), and the two hero files are preloaded, so first paint never waits on Google. The client wall's lockup fonts load asynchronously (`media="print" onload`) with `text=` subsets. The reel fonts sit in `data-fonts` on `#graphics` and only load once that section is 1500px away.
 - Logos are stored at about 2.25× their largest display height. Heavy SVGs keep only the coordinate precision their size needs.
 - Timers that only animate on screen (the About stat ticker, reels) skip their turns while off screen.
+- Websites scenes are parked (`.is-parked`: `visibility:hidden` and `content-visibility:hidden`) 700ms after they stop being shown, so only the shown site's 3D desk and phone layers exist.
+- At 900px and below, Experience, the client wall, Stories, Websites and Email use `content-visibility:auto` with their measured phone heights, so far-off sections free their layers and images. iOS Safari reloads the page when it runs out of memory.
 - After editing `styles.css` or `script.js`, bump the version query in `index.html` (`?v=`) so caches refresh.
 
 ## 10. Copy voice

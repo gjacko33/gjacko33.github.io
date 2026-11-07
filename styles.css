@@ -253,6 +253,8 @@ html.has-dialog { overflow:hidden; }
 .site-stage .site-shot.is-active { transform:none; }
 .site-shot { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; opacity:0; transform:scale(1.02); transition:opacity .45s var(--ease),transform .6s var(--ease); }
 .site-shot.is-active { opacity:1; transform:none; }
+/* Scenes that have finished fading out are parked: nothing inside them is laid out or painted, so their 3D layers hold no memory. */
+.site-shot.is-parked { visibility:hidden; content-visibility:hidden; }
 .site-viewport { position:relative; display:block; height:100%; overflow:hidden; container-type:size; background:#fff; }
 .site-page { display:block; width:100%; height:auto; }
 .site-shot.is-active .site-page { animation:site-scroll var(--scroll,20s) cubic-bezier(.45,0,.55,1) infinite alternate; }
@@ -681,6 +683,13 @@ html.has-dialog { overflow:hidden; }
   .project-card { position:relative; top:auto; height:auto; min-height:480px; transform:none; filter:none; }
 }
 @media (max-width:900px) {
+  /* Phones and tablets skip rendering big sections while they are far off screen, so their layers and decoded images can be freed
+     (iOS Safari reloads the page when it runs out of memory). The sizes are the measured phone heights, used until a section has rendered once. */
+  .experience { content-visibility:auto; contain-intrinsic-size:auto 1470px; }
+  .brand-strip { content-visibility:auto; contain-intrinsic-size:auto 530px; }
+  .work { content-visibility:auto; contain-intrinsic-size:auto 2850px; }
+  .websites { content-visibility:auto; contain-intrinsic-size:auto 1520px; }
+  .emails { content-visibility:auto; contain-intrinsic-size:auto 1570px; }
   .mail-showcase { grid-template-columns:minmax(0,1fr); }
   .hero h1 { font-size:clamp(84px,17vw,160px); }
   .about-content { grid-template-columns:1fr; gap:35px; }
